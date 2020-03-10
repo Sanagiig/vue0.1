@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^13.9.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-typescript2": "^0.26.0"
   }
