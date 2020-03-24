@@ -1,9 +1,9 @@
 import Watcher from "./watcher"
-import { remove } from "@utils/shared"
+import { remove } from "@utils/shared/index"
 let uid = 0;
 
 export default class Dep {
-  static target: Watcher | null;
+  static target?: Watcher | null;
   id: number;   
   subs: Array<Watcher>;
 
@@ -42,10 +42,17 @@ export default class Dep {
   }
 }
 
+// The current target watcher being evaluated.
+// This is globally unique because only one watcher
+// can be evaluated at a time.
+Dep.target = null
+const targetStack:Array<Watcher | null | undefined>  = []
 export function pushTarget(target?:Watcher){
-
+  targetStack.push(target)
+  Dep.target = target
 }
 
-export function popTarget(target?:Watcher){
-
+export function popTarget(){
+  targetStack.pop()
+  Dep.target = targetStack[targetStack.length - 1]
 }

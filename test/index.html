@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div type="text" id="input"></div>
+    <button id="btn">change</button>
+    <script>
+        var inp = document.createTextNode('input');
+        var ob = new MutationObserver(function () {
+            console.log('arg', arguments);
+        });
+
+        document.getElementById('btn').addEventListener('click', function () {
+            console.log('click')
+            inp.data = Date.now();
+        })
+
+        ob.observe(inp, {
+            characterData: true
+        })
+    </script>
+</body>
+
+</html>
