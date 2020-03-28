@@ -10,6 +10,8 @@ declare interface Watcher {
     vm: Component;
     expression: string;
     cb: Function;
+    evaluate: () => void;
+    depend: () => void;
     id: number;
     deep: boolean;
     user: boolean;

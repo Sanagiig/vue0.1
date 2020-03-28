@@ -5,3 +5,7 @@ export * from './env';
 export * from './error';
 export * from './parser';
 export * from './next-tick';
+export * from './mixin';
+export * from './options';
+export * from './convert/index';
+export { defineReactive } from '@core/observer/index';

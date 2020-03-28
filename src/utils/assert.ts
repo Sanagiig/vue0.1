@@ -22,6 +22,18 @@ export function isTrue (v: any): boolean {
 export function isFalse (v: any): boolean {
   return v === false
 }
+/**
+ * Check if value is primitive.
+ */
+export function isPrimitive (value: any): boolean {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    // $flow-disable-line
+    typeof value === 'symbol' ||
+    typeof value === 'boolean'
+  )
+}
 
 /**
  * Strict object type check. Only returns true
@@ -49,10 +61,18 @@ export function isPromise (val: any): boolean {
 }
 
 /**
+ * Check if val is a valid array index.
+ */
+export function isValidArrayIndex (val: any): boolean {
+  const n = parseFloat(String(val))
+  return n >= 0 && Math.floor(n) === n && isFinite(val)
+}
+
+/**
  * Check whether an object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
-export function hasOwn (obj: Object | Array<any>, key: string): boolean {
+export function hasOwn (obj:any, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
 

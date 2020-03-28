@@ -1,3 +1,5 @@
+export * from './constants';
+
 /**
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
@@ -29,4 +31,16 @@ export function remove(arr: Array<any>, item: any): Array<any> | void {
       return arr.splice(index, 1)
     }
   }
+}
+
+/**
+ * Create a cached version of a pure function.
+ */
+export function cached (fn: Function): Function {
+  const cache = Object.create(null);
+  const cachedFn:Function = function (str: string): any {
+    const hit = cache[str];
+    return hit || (cache[str] = fn(str));
+  }
+  return cachedFn
 }

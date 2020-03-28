@@ -1,6 +1,12 @@
 import { no } from '@utils/shared/index';
 
 const config: Config = {
+     /**
+     * Option merge strategies (used in core/util/options)
+     */
+    // $flow-disable-line
+    optionMergeStrategies: {},
+
     /**
      * Whether to suppress warnings.
      */
