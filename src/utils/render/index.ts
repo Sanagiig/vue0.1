@@ -1,0 +1,1 @@
+export function installRenderHelpers(target: any) { }

@@ -37,6 +37,22 @@ const config: Config = {
      * component. This is platform-dependent and may be overwritten.
      */
     isReservedTag: no,
+
+    /**
+     * Check if an attribute is reserved so that it cannot be used as a component
+     * prop. This is platform-dependent and may be overwritten.
+     */
+    isReservedAttr: no,
+
+    /**
+     * Show production mode tip message on boot?
+     */
+    productionTip: false,
+
+    /**
+     * Whether to record perf
+     */
+    performance: false,
 }
 
 export default config;

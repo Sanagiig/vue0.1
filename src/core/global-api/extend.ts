@@ -18,7 +18,10 @@ export function initExtend(Vue: GlobalAPI) {
   /**
    * Class inheritance
    */
-  Vue.extend = function (this:ComponentCtor,extendOptions: ComponentOptions = {}): Function{
+  Vue.extend = function (
+    this: ComponentCtor,
+    extendOptions: ComponentOptions = <ComponentOptions>{}
+  ): Function{
     const Super = this;
     const SuperId = Super.cid;
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {});

@@ -3,10 +3,10 @@ declare interface WatcherCtor{
         expOrFn: string | Function,
         cb: Function,
         options?: Object,
-        isRenderWatcher?: boolean):Watcher;
+        isRenderWatcher?: boolean):WatcherInstance;
 }
 
-declare interface Watcher {
+declare interface WatcherInstance {
     vm: Component;
     expression: string;
     cb: Function;
@@ -24,10 +24,24 @@ declare interface Watcher {
     newDeps: Array<Dep>;
     depIds: SimpleSet;
     newDepIds: SimpleSet;
+    addDep: Function;
     update: Function;
+    cleanupDeps: Function;
     teardown: Function;
-    before: Function;
+    before?: Function;
     getter: Function;
     value: any;
   
-  }
+}
+  
+declare type WatcherOption = {
+    // 是否用户创建
+    user?: boolean;
+    // 是否立即cb
+    imediate?: boolean;
+    deep?: boolean;
+    lazy?: boolean;
+    sync?: boolean;
+    before?: Function;
+    handler?: Function;
+}

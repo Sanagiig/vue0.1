@@ -35,5 +35,21 @@ declare type Config = {
      * Check if a tag is reserved so that it cannot be registered as a
      * component. This is platform-dependent and may be overwritten.
      */
-    isReservedTag:Function,
+    isReservedTag: Function,
+
+    /**
+     * Check if an attribute is reserved so that it cannot be used as a component
+     * prop. This is platform-dependent and may be overwritten.
+     */
+    isReservedAttr: Function,
+    
+    /**
+     * Show production mode tip message on boot?
+     */
+    productionTip: boolean;
+
+     /**
+     * Whether to record perf
+     */
+    performance: boolean,
 }

@@ -32,12 +32,12 @@ export default class Watcher{
     vm: Component | any,
     expOrFn: string | Function,
     cb: Function,
-    options?: any | null | undefined,
+    options?: WatcherOption,
     isRenderWatcher?: boolean
   ) {
     this.vm = vm;
     if (isRenderWatcher) {
-      console.log('do ...isRenderWatcher');
+      vm._watcher = this;
     }
 
     vm._watchers.push(this);
@@ -88,7 +88,7 @@ export default class Watcher{
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  get () {
+  get (this:WatcherInstance) {
     pushTarget(this)
     let value
     const vm = this.vm

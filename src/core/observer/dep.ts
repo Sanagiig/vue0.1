@@ -3,16 +3,16 @@ import { remove } from "@utils/shared/index"
 let uid = 0;
 
 export default class Dep {
-  static target?: Watcher | null;
+  static target?: WatcherInstance | null;
   id: number;   
-  subs: Array<Watcher>;
+  subs: Array<WatcherInstance>;
 
   constructor () {
     this.id = uid++
     this.subs = []
   }
 
-  addSub (sub: Watcher) {
+  addSub (sub: WatcherInstance) {
     this.subs.push(sub)
   }
 
@@ -46,8 +46,8 @@ export default class Dep {
 // This is globally unique because only one watcher
 // can be evaluated at a time.
 Dep.target = null
-const targetStack:Array<Watcher | null | undefined>  = []
-export function pushTarget(target?:Watcher){
+const targetStack:Array<WatcherInstance | null | undefined>  = []
+export function pushTarget(target?:WatcherInstance){
   targetStack.push(target)
   Dep.target = target
 }

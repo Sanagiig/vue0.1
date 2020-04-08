@@ -1,13 +1,12 @@
 import Watcher from './watcher';
-import { callHook,activateChildComponent } from '@core/instance/lifecycle/index';
-import { warn } from '@utils/debug';
+import { callHook,activateChildComponent } from '@core/instance/lifecycle';
+import { warn,devtools } from '@utils/index';
 import { nextTick } from '@utils/next-tick';
 import config from '@config/index';
-import { devtools } from '@utils/env';
 
 export const MAX_UPDATE_COUNT = 100;
 
-const queue: Watcher[] = [];
+const queue: WatcherInstance[] = [];
 const activatedChildren: Component[] = [];
 let has: { [key: number]: true | null | false } = {};
 // 
@@ -52,7 +51,7 @@ function callUpdatedHooks (queue:any[]) {
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue() {
-    let watcher: Watcher, id: number;
+    let watcher: WatcherInstance, id: number;
 
     flushing = true;
 
@@ -117,7 +116,7 @@ function flushSchedulerQueue() {
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
  */
-export function queueWatcher(watcher: Watcher) {
+export function queueWatcher(watcher: WatcherInstance) {
     const id = watcher.id;
     if (has[id] == null) {
         has[id] = true;
