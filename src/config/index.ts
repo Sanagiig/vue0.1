@@ -1,4 +1,5 @@
-import { no } from '@utils/shared/index';
+import { no,noop } from '@utils/index';
+import { identity } from '../utils/env';
 
 const config: Config = {
      /**
@@ -43,6 +44,16 @@ const config: Config = {
      * prop. This is platform-dependent and may be overwritten.
      */
     isReservedAttr: no,
+
+    /**
+     * Get the namespace of an element
+     */
+    getTagNamespace: noop,
+
+    /**
+     * Parse the real tag name for the specific platform.
+     */
+    parsePlatformTagName: identity,
 
     /**
      * Show production mode tip message on boot?

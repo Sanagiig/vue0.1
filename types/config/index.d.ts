@@ -44,6 +44,11 @@ declare type Config = {
     isReservedAttr: Function,
     
     /**
+     * Parse the real tag name for the specific platform.
+     */
+    parsePlatformTagName: (x: string) => string;
+    
+    /**
      * Show production mode tip message on boot?
      */
     productionTip: boolean;
@@ -52,4 +57,9 @@ declare type Config = {
      * Whether to record perf
      */
     performance: boolean,
+
+    /**
+     * Get the namespace of an element
+     */
+    getTagNamespace: (x?: string) => string | void;
 }

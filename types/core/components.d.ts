@@ -34,6 +34,7 @@ declare interface Component {
     $refs: { [key: string]: any };
     $slots: VNodeInstance[];
     $scopedSlots: { [key: string]: VNodeInstance };
+    $vnode?: VNodeInstance | void; // the placeholder node for the component in parent's render tree
     $createElement: (a: any, b: any, c: any, d: any) => Function;
     
     /**

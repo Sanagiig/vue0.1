@@ -1,11 +1,22 @@
 export default class VNode {
   text?: string;
   parent?: VNodeInstance;
+  data?: VNodeData;
   // empty comment placeholder?
   isComment: boolean; 
   // rendered in this component's scope
   context: Component; 
-  constructor() {
+  componentOptions?: VNodeComponentOptions;
+
+  constructor(
+    tag?: string,
+    data?: VNodeData,
+    children?: VNodeInstance[],
+    elm?: Node,
+    context?: Component,
+    componentOptions?: VNodeComponentOptions,
+    asyncFactory?:Function
+  ) {
     this.isComment = false;
     this.context = <any>{};
   }

@@ -1,6 +1,11 @@
 export const unicodeLetters = 'a-zA-Z'
 
 /**
+ * Return the same value.
+ */
+export const identity = (_: any) => _;
+
+/**
  * Parse simple path.
  */
 const bailRE = new RegExp(`[^${unicodeLetters}.$_\\d]`)
