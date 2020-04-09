@@ -32,8 +32,8 @@ declare interface Component {
     $parent: Component;
     $root: Component;
     $refs: { [key: string]: any };
-    $slots: VNode[];
-    $scopedSlots: { [key: string]: VNode };
+    $slots: VNodeInstance[];
+    $scopedSlots: { [key: string]: VNodeInstance };
     $createElement: (a: any, b: any, c: any, d: any) => Function;
     
     /**
@@ -48,7 +48,7 @@ declare interface Component {
     // provide obj
     _provided:{ [key: string]: any };
     // v-once cached trees
-    _staticTrees: Array<VNode> | null;
+    _staticTrees: Array<VNodeInstance> | null;
     // 防止被ob
     _isVue: boolean;
     _isMounted: boolean;

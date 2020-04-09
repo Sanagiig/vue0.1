@@ -124,7 +124,7 @@ export function setActiveInstance(vm: Component):any {
 export function lifecycleMixin(Vue: ComponentCtor) {
   Vue.prototype._update = function (
     this: Component,
-    vnode: VNode,
+    vnode: VNodeInstance,
     hydrating?: boolean) {
     const vm = this;
     const prevEl = vm.$el;

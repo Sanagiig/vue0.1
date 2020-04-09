@@ -1,11 +1,13 @@
-export default class VNode{
+export default class VNode {
   text?: string;
-  parent?: VNode;
+  parent?: VNodeInstance;
   // empty comment placeholder?
   isComment: boolean; 
-
+  // rendered in this component's scope
+  context: Component; 
   constructor() {
     this.isComment = false;
+    this.context = <any>{};
   }
 }
 

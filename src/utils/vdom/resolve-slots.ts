@@ -2,9 +2,9 @@
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
 export function resolveSlots(
-  children: VNode[],
+  children: VNodeInstance[],
   context: Component
-): { [key: string]: Array<VNode> } { 
+): { [key: string]: Array<VNodeInstance> } { 
   return <any>{}
 }
 

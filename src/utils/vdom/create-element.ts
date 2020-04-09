@@ -7,6 +7,6 @@ export function createElement(
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNode | Array<VNode> {
+): VNodeInstance | Array<VNodeInstance> {
   return <any>{}
 }

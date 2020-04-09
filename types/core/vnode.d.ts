@@ -1,7 +1,7 @@
-declare interface VNode {
+declare interface VNodeInstance {
   test?: string;
   data?: VNodeData;
-  parent: VNode;
+  parent: VNodeInstance;
   // rendered in this component's scope
   context: Component; 
   // 组件opts
@@ -11,13 +11,14 @@ declare interface VNode {
 declare type VNodeData = {
   slot?: string;
   scopedSlots?: { [key: string]: Function };
+  attrs:any;
 }
 
 declare type VNodeComponentOptions = {
   Ctor: ComponentCtor;
   propsData?: PropOptions;
   listeners: any;
-  children: Array<VNode>;
+  children: Array<VNodeInstance>;
   tag?: string;
 };
 

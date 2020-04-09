@@ -1,7 +1,7 @@
 declare type InternalComponentOptions = {
     _isComponent: boolean;
     parent: Component;
-    _parentVnode: VNode;
+    _parentVnode: VNodeInstance;
     render?: Function;
     staticRenderFns?: Array<Function>
   };
@@ -34,9 +34,9 @@ declare type ComponentOptions = {
         [key:number] : ComponentCtor
     };
     _base: ComponentCtor
-    _parentVnode: VNode;
+    _parentVnode: VNodeInstance;
     _parentListeners?: { [key: string]:any };
-    _renderChildren?: VNode[];
+    _renderChildren?: VNodeInstance[];
     _componentTag: string;
     [key: string]: any | void;
 }
