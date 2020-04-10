@@ -12,5 +12,7 @@ export * from './platform/index';
 export * from './vdom/index';
 export * from './props';
 export * from './render/index';
+export * from './element';
+
 
 export { defineReactive } from '@core/observer/index';
