@@ -86,7 +86,7 @@ export function initRender(vm: Component | any) {
   const renderContext = parentVnode && parentVnode.context;
   vm.$slots = resolveSlots(
     (<VNodeInstance[]>options._renderChildren),
-    renderContext
+    <Component>renderContext
   );
   vm.$scopedSlots = emptyObject;
   // bind the createElement fn to this instance

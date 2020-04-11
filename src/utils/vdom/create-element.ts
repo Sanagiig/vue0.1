@@ -1,10 +1,10 @@
 import { isPrimitive, isTrue, isDef } from '../assert';
 import { createEmptyVNode } from '../../core/vdom/vnode';
 import { warn } from '../debug';
-import { default } from '../../core/components/index';
 import { normalizeChildren, simpleNormalizeChildren } from './normalize-children';
 import config from '@config/index';
 import VNode from '../../core/vdom/vnode';
+import { createComponent } from './create-component';
 
 const SIMPLE_NORMALIZE = 1;
 const ALWAYS_NORMALIZE = 2;
@@ -18,7 +18,7 @@ export function createElement(
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNodeInstance | Array<VNodeInstance> {
+): VNodeInstance | Array<VNodeInstance> | VNode{
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children;
     children = data;
@@ -36,7 +36,7 @@ export function _createElement(
   data?: VNodeData | any,
   children?: any,
   normalizationType?: number
-): VNodeInstance | Array<VNodeInstance> {
+): VNodeInstance | Array<VNodeInstance> | VNode{
   if (isDef(data) && isDef((<any>data).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -88,5 +88,24 @@ export function _createElement(
         undefined, undefined, context
       );
     }
+  }else {
+    // direct component options / constructor
+    vnode = createComponent(tag,data,context,children);
+  }
+  if(Array.isArray(vnode)){
+    return vnode;
+  }else if(isDef(vnode)){
+    if(isDef(ns)) applyNS(vnode,ns);
+    if(isDef(data)) registerDeepBindings(data);
+    return vnode;
+  }else{
+    return createEmptyVNode();
   }
 }
+
+function applyNS (vnode:any, ns:any, force?:any) {}
+
+// ref #5318
+// necessary to ensure parent re-render when deep bindings like :style and
+// :class are used on slot nodes
+function registerDeepBindings (data:any) {}
