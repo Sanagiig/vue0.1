@@ -42,12 +42,23 @@ declare type Config = {
      * prop. This is platform-dependent and may be overwritten.
      */
     isReservedAttr: Function,
+
+    /**
+     * Check if a tag is an unknown element.
+     * Platform-dependent.
+     */
+    isUnknownElement: Function,
     
     /**
      * Parse the real tag name for the specific platform.
      */
     parsePlatformTagName: (x: string) => string;
     
+    /**
+     * Ignore certain custom elements
+     */
+    ignoredElements: Array<string | RegExp>;
+
     /**
      * Show production mode tip message on boot?
      */
