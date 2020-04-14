@@ -38,6 +38,7 @@ declare type ComponentOptions = {
     _parentListeners?: { [key: string]:any };
     _renderChildren?: VNodeInstance[];
     _componentTag: string;
+    _scopeId: string;
     [key: string]: any | void;
 }
 

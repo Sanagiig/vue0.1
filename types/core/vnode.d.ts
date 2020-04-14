@@ -4,7 +4,7 @@ declare interface VNodeCtor{
     data?: VNodeData,
     children?: Array<VNodeInstance>,
     text?: string,
-    elm?: Node,
+    elm?: Element,
     context?: Component,
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
@@ -17,7 +17,7 @@ declare interface VNodeInstance {
   child?:Component;
   children?: Array<VNodeInstance>;
   text?: string  ;
-  elm?: Node;
+  elm?: Element;
   ns?: string;
   context?: Component; // rendered in this component's scope
   key?: string | number;
@@ -59,6 +59,8 @@ declare type VNodeData = {
   domProps?: { [key: string]: any };
   hook?: { [key: string]: Function };
   on?: { [key: string]: Function | Array<Function> };
+  // mark
+  init?:any;
   nativeOn?: { [key: string]: Function | Array<Function> };
   transition?: any;
   show?: boolean; // marker for v-show
@@ -75,6 +77,22 @@ declare type VNodeData = {
   };
   moved?:boolean;
 }
+
+// interface for vnodes in update modules
+declare type VNodeWithData = {
+  tag: string;
+  data: VNodeData;
+  children: Array<VNode>;
+  text: void;
+  elm: any;
+  ns: string | void;
+  context: Component;
+  key: string | number | void;
+  parent?: VNodeWithData;
+  componentOptions?: VNodeComponentOptions;
+  componentInstance?: Component;
+  isRootInsert: boolean;
+};
 
 declare type VNodeComponentOptions = {
   Ctor: ComponentCtor;

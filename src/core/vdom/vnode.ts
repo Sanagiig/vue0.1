@@ -3,7 +3,7 @@ export default class VNode {
   data?: VNodeData;
   children ?: Array<VNodeInstance>;
   text?: string  ;
-  elm?: Node;
+  elm?: Element;
   ns?: string;
   context?: Component; // rendered in this component's scope
   key?: string | number;
@@ -32,7 +32,7 @@ export default class VNode {
     data?: VNodeData,
     children?: VNodeInstance[],
     text?:string,
-    elm?: Node,
+    elm?: Element,
     context?: Component,
     componentOptions?: VNodeComponentOptions,
     asyncFactory?:Function
