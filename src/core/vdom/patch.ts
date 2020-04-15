@@ -3,14 +3,6 @@ import VNode, { cloneVNode } from "./vnode";
 import config from "@config/index";
 import { isRegExp } from "util";
 import {} from "@utils/index";
-import {
-  parentNode,
-  insertBefore,
-  appendChild,
-  createTextNode,
-  setStyleScope,
-  createComment,
-} from "../../utils/node-ops";
 import { isPrimitive, isUndef, isTextInputType } from '../../utils/assert';
 import { activeInstance } from "../instance/lifecycle";
 import { setTextContent, tagName, parentNode } from '../../utils/node-ops';
@@ -232,7 +224,7 @@ export function createPatchFunction(backend: any) {
   }
 
   function reactivateComponent(
-    vnode: VNode, insertedVnodeQueue: any, parentElm: any, refElm: any
+    vnode: VNodeInstance, insertedVnodeQueue: any, parentElm: any, refElm: any
   ) { 
 
   }
@@ -380,7 +372,7 @@ function invokeInsertHook (vnode:any, queue:any, initial:any) {
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
           removeAndInvokeRemoveHook(ch);
-          invokeDestoyHook(ch);
+          invokeDestroyHook(ch);
         } else { // Text node
           removeNode(<Node>ch.elm);
         }
@@ -686,7 +678,7 @@ function invokeInsertHook (vnode:any, queue:any, initial:any) {
   }
 
   return function patch(
-    oldVnode: any,
+    oldVnode: any | VNodeInstance | Element,
     vnode: VNodeInstance,
     hydrating:any, 
     removeOnly?:any

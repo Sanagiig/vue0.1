@@ -82,7 +82,7 @@ declare type VNodeData = {
 declare type VNodeWithData = {
   tag: string;
   data: VNodeData;
-  children: Array<VNode>;
+  children: Array<VNodeInstance>;
   text: void;
   elm: any;
   ns: string | void;
