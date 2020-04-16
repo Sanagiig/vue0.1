@@ -1,0 +1,1 @@
+export function detectErrors (ast: ASTNode | null, warn: Function) {}

@@ -86,6 +86,8 @@ export function hasOwn (obj:any, key: string): boolean {
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
+export const isPreTag = (tag: string): boolean => tag === 'pre';
+
 export const isHTMLTag = makeMap(
   'html,body,base,head,link,meta,style,title,' +
   'address,article,aside,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +

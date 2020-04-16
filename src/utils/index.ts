@@ -13,6 +13,6 @@ export * from './vdom/index';
 export * from './props';
 export * from './render/index';
 export * from './element';
-
+export * from './compiler';
 
 export { defineReactive } from '@core/observer/index';
