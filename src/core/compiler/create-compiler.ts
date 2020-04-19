@@ -34,12 +34,40 @@ export function createCompilerCreator (baseCompile: Function): Function {
             (tip ? tips : error).push(data);
           }
         }
-
         // merge custom modules
         if(options.modules){
-          
+          finalOptions.modules =
+            (baseOptions.modules || []).concat(options.modules)
+        }
+         // merge custom directives
+        if (options.directives) {
+          finalOptions.directives = extend(
+            Object.create(baseOptions.directives || null),
+            options.directives
+          )
+        }
+        // copy other options
+        for (const key in options) {
+          if (key !== 'modules' && key !== 'directives') {
+            finalOptions[key] = (<any>options)[key]
+          }
         }
       }
+
+      finalOptions.warn = warn;
+
+      const compiled = baseCompile(template.trim(), finalOptions);
+      if (process.env.NODE_ENV !== 'production') {
+        detectErrors(compiled.ast, warn)
+      }
+      compiled.error = error;
+      compiled.tips = tips;
+      return compiled;
+    }
+
+    return {
+      compile,
+      compileToFunctions:createCompileToFunctionFn(compile)
     }
   }
 }

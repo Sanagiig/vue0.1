@@ -1,5 +1,13 @@
 import Vue from '@platform/runtime/index';
-import { cached, query,warn,getOuterHTML } from '@utils/index';
+import {
+  cached,
+  query,
+  warn,
+  getOuterHTML,
+  shouldDecodeNewlines,
+  shouldDecodeNewlinesForHref
+} from '@utils/index';
+import { compileToFunctions } from '@platform/compiler/index';
 
 const idToTemplate = cached((id:string | Element) => {
   const el = query(id);
@@ -56,15 +64,15 @@ Vue.prototype.$mount = function (
       //   mark('compile')
       // }
 
-      // const { render, staticRenderFns } = compileToFunctions(template, {
-      //   outputSourceRange: process.env.NODE_ENV !== 'production',
-      //   shouldDecodeNewlines,
-      //   shouldDecodeNewlinesForHref,
-      //   delimiters: options.delimiters,
-      //   comments: options.comments
-      // }, this)
-      // options.render = render
-      // options.staticRenderFns = staticRenderFns
+      const { render, staticRenderFns } = compileToFunctions(template, {
+        outputSourceRange: process.env.NODE_ENV !== 'production',
+        shouldDecodeNewlines,
+        shouldDecodeNewlinesForHref,
+        delimiters: options.delimiters,
+        comments: options.comments
+      }, this)
+      options.render = render
+      options.staticRenderFns = staticRenderFns
 
       // /* istanbul ignore if */
       // if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -74,7 +82,8 @@ Vue.prototype.$mount = function (
     }
   }
 
-  // Vue.compile = compileToFunctions;
-
   return mount.call(this, el, hydrating);
 }
+
+Vue.compile = compileToFunctions;
+export default Vue;
