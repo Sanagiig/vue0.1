@@ -1,5 +1,1 @@
-export default {
-  klass:{},
-  style:{},
-  model:{},
-};
+export default [];

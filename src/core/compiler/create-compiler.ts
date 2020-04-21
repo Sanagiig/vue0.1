@@ -36,10 +36,33 @@ export function createCompilerCreator (baseCompile: Function): Function {
         }
 
         // merge custom modules
+        if (options.modules) {
+          finalOptions.modules =
+            (baseOptions.modules || []).concat(options.modules)
+        }
+        // merge custom directives
         if(options.modules){
-          
+          finalOptions.directives = extend(
+            Object.create(baseOptions.directives || null),
+            <any>options.directives
+          )
+        }
+        // copy other options
+        for(const key in options){
+          if(key !== 'modules' && key !== 'directives'){
+            finalOptions[key] = (<any>options)[key];
+          }
         }
       }
+
+      finalOptions.warn = warn;
+      const compiled = baseCompile(template.trim(),finalOptions);
+      if (process.env.NODE_ENV !== 'production') {
+        detectErrors(compiled.ast, warn)
+      }
+      compiled.error = error;
+      compiled.tips = tips;
+      return compiled;
     }
   }
 }

@@ -56,15 +56,15 @@ Vue.prototype.$mount = function (
       //   mark('compile')
       // }
 
-      // const { render, staticRenderFns } = compileToFunctions(template, {
-      //   outputSourceRange: process.env.NODE_ENV !== 'production',
-      //   shouldDecodeNewlines,
-      //   shouldDecodeNewlinesForHref,
-      //   delimiters: options.delimiters,
-      //   comments: options.comments
-      // }, this)
-      // options.render = render
-      // options.staticRenderFns = staticRenderFns
+      const { render, staticRenderFns } = compileToFunctions(template, {
+        outputSourceRange: process.env.NODE_ENV !== 'production',
+        shouldDecodeNewlines,
+        shouldDecodeNewlinesForHref,
+        delimiters: options.delimiters,
+        comments: options.comments
+      }, this)
+      options.render = render
+      options.staticRenderFns = staticRenderFns
 
       // /* istanbul ignore if */
       // if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
