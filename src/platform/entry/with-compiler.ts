@@ -1,5 +1,13 @@
 import Vue from '@platform/runtime/index';
-import { cached, query,warn,getOuterHTML } from '@utils/index';
+import {
+  cached,
+  query,
+  warn,
+  getOuterHTML,
+  shouldDecodeNewlines,
+  shouldDecodeNewlinesForHref
+} from '@utils/index';
+import { compileToFunctions } from '@platform/compiler/index';
 
 const idToTemplate = cached((id:string | Element) => {
   const el = query(id);
@@ -74,7 +82,8 @@ Vue.prototype.$mount = function (
     }
   }
 
-  // Vue.compile = compileToFunctions;
-
   return mount.call(this, el, hydrating);
 }
+
+Vue.compile = compileToFunctions;
+export default Vue;

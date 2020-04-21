@@ -14,5 +14,6 @@ export * from './props';
 export * from './render/index';
 export * from './element';
 export * from './compiler';
+export * from './compat';
 
 export { defineReactive } from '@core/observer/index';

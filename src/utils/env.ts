@@ -10,6 +10,7 @@ export const inBrowser = typeof window !== 'undefined'
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const inWeex = false // typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform
 export const isIE = UA && /msie|trident/.test(UA)
+export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isIOS = false //(UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
 
 // this needs to be lazy-evaled because vue may be required before
