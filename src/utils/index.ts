@@ -3,7 +3,7 @@ export * from './assert';
 export * from './debug';
 export * from './env';
 export * from './error';
-export * from './parser';
+export * from './parser/index';
 export * from './next-tick';
 export * from './mixin';
 export * from './options';

@@ -157,13 +157,126 @@ export function parseHTML(html: any, options: any) {
     html = html.substring(n)
   }
   function parseStartTag():any { 
-
+    const start = html.match(startTagOpen)
+    if (start) {
+      const match:any = {
+        tagName: start[1],
+        attrs: [],
+        start: index
+      }
+      advance(start[0].length)
+      let end, attr
+      while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
+        attr.start = index
+        advance(attr[0].length)
+        attr.end = index
+        match.attrs.push(attr)
+      }
+      if (end) {
+        match.unarySlash = end[1]
+        advance(end[0].length)
+        match.end = index
+        return match
+      }
+    }
   }
   function handleStartTag(match: any) { 
+    const tagName = match.tagName
+    const unarySlash = match.unarySlash
 
+    // 期望 html ??
+    if (expectHTML) {
+      if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
+        parseEndTag(lastTag)
+      }
+      if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
+        parseEndTag(tagName)
+      }
+    }
+
+    const unary = isUnaryTag(tagName) || !!unarySlash
+
+    const l = match.attrs.length
+    const attrs = new Array(l)
+    // 生成 attrs
+    for (let i = 0; i < l; i++) {
+      const args = match.attrs[i]
+      const value = args[3] || args[4] || args[5] || ''
+      const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
+        ? options.shouldDecodeNewlinesForHref
+        : options.shouldDecodeNewlines
+      attrs[i] = {
+        name: args[1],
+        value: decodeAttr(value, shouldDecodeNewlines)
+      }
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+        attrs[i].start = args.start + args[0].match(/^\s*/).length
+        attrs[i].end = args.end
+      }
+    }
+
+    if (!unary) {
+      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
+      lastTag = tagName
+    }
+
+    if (options.start) {
+      options.start(tagName, attrs, unary, match.start, match.end)
+    }
   }
   function parseEndTag(tagName?: string, start?: number, end?: number) {
+    // 当前tag 在栈中的位置
+    let pos, 
+        lowerCasedTagName
+    if (start == null) start = index
+    if (end == null) end = index
 
+    // Find the closest opened tag of the same type
+    if (tagName) {
+      lowerCasedTagName = tagName.toLowerCase()
+      for (pos = stack.length - 1; pos >= 0; pos--) {
+        // 对比栈中的标签
+        if (stack[pos].lowerCasedTag === lowerCasedTagName) {
+          break
+        }
+      }
+    } else {
+      // If no tag name is provided, clean shop
+      pos = 0
+    }
+
+    if (pos >= 0) {
+      // Close all the open elements, up the stack
+      for (let i = stack.length - 1; i >= pos; i--) {
+        if (process.env.NODE_ENV !== 'production' &&
+          (i > pos || !tagName) &&
+          options.warn
+        ) {
+          options.warn(
+            `tag <${stack[i].tag}> has no matching end tag.`,
+            { start: stack[i].start }
+          )
+        }
+        if (options.end) {
+          options.end(stack[i].tag, start, end)
+        }
+      }
+
+      // Remove the open elements from the stack
+      stack.length = pos
+      lastTag = pos && stack[pos - 1].tag
+    } else if (lowerCasedTagName === 'br') {
+      if (options.start) {
+        options.start(tagName, [], true, start, end)
+      }
+    } else if (lowerCasedTagName === 'p') {
+      if (options.start) {
+        options.start(tagName, [], false, start, end)
+      }
+      if (options.end) {
+        options.end(tagName, start, end)
+      }
+    }
   }
 }
 
