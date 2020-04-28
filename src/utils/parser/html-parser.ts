@@ -90,3 +90,12 @@ export function getBindingAttr (
     }
   }
 }
+
+export function getRawBindingAttr (
+  el: ASTElement,
+  name: string
+) {
+  return el.rawAttrsMap[':' + name] ||
+    el.rawAttrsMap['v-bind:' + name] ||
+    el.rawAttrsMap[name]
+}
