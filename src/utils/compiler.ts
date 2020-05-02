@@ -29,3 +29,4 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
     return keys.concat(m.staticKeys || [])
   }, []).join(',')
 }
+

@@ -194,7 +194,6 @@ export function parseHTML(html: any, options: any) {
     index += n
     html = html.substring(n)
   }
-
   function parseStartTag():any { 
     const start = html.match(startTagOpen)
     if (start) {
@@ -224,6 +223,7 @@ export function parseHTML(html: any, options: any) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
+    // 期望 html ??
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
@@ -266,40 +266,55 @@ export function parseHTML(html: any, options: any) {
 
   function parseEndTag(tagName?: string, start?: number, end?: number) {
     // 当前tag 在栈中的位置
-    let pos,
-      lowerCasedTagName;
-    if (start == null) start = index;
-    if (end == null) end = index;
+    let pos, 
+        lowerCasedTagName
+    if (start == null) start = index
+    if (end == null) end = index
 
     // Find the closest opened tag of the same type
     if (tagName) {
-      lowerCasedTagName = tagName.toLowerCase();
-      for (pos = stack.length - 1; pos >= 0; pos--){
+      lowerCasedTagName = tagName.toLowerCase()
+      for (pos = stack.length - 1; pos >= 0; pos--) {
         // 对比栈中的标签
         if (stack[pos].lowerCasedTag === lowerCasedTagName) {
-          break;
+          break
         }
       }
     } else {
       // If no tag name is provided, clean shop
-      pos = 0;
+      pos = 0
     }
 
     if (pos >= 0) {
       // Close all the open elements, up the stack
-      for (let i = stack.length - 1; i >= pos; i--){
+      for (let i = stack.length - 1; i >= pos; i--) {
         if (process.env.NODE_ENV !== 'production' &&
           (i > pos || !tagName) &&
           options.warn
-        ) { 
+        ) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`,
             { start: stack[i].start }
           )
         }
         if (options.end) {
-          options.end(stack[i].tag, start, end);
+          options.end(stack[i].tag, start, end)
         }
+      }
+
+      // Remove the open elements from the stack
+      stack.length = pos
+      lastTag = pos && stack[pos - 1].tag
+    } else if (lowerCasedTagName === 'br') {
+      if (options.start) {
+        options.start(tagName, [], true, start, end)
+      }
+    } else if (lowerCasedTagName === 'p') {
+      if (options.start) {
+        options.start(tagName, [], false, start, end)
+      }
+      if (options.end) {
+        options.end(tagName, start, end)
       }
     }
   }

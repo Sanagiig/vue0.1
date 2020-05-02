@@ -1,5 +1,4 @@
+import model from './model';
 export default {
-  klass:{},
-  style:{},
-  model:{},
+
 };

@@ -35,6 +35,11 @@ export function createCompilerCreator (baseCompile: Function): Function {
           }
         }
         // merge custom modules
+        if (options.modules) {
+          finalOptions.modules =
+            (baseOptions.modules || []).concat(options.modules)
+        }
+        // merge custom directives
         if(options.modules){
           finalOptions.modules =
             (baseOptions.modules || []).concat(options.modules)
