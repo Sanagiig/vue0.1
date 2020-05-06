@@ -48,6 +48,11 @@ export function addRawAttr (el: ASTElement, name: string, value: any, range?: Ra
   el.attrsList.push(rangeSetItem({ name, value }, range))
 }
 
+export function addAttr (el: ASTElement, name: string, value: any, range?: Range) {
+  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
+}
+
 // note: this only removes the attr from the Array (attrsList) so that it
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
