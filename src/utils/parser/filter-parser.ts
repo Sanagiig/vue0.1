@@ -75,7 +75,7 @@ export function parseFilters (exp: string): string {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
-        // “/” 前无空白字符 或 前面非空白字符不匹配 re 触发
+        // “/” 前无字符 或 前面非空白字符不匹配 re 则进入正则判断
         if (!p || !validDivisionCharRE.test(p)) {
           inRegex = true
         }

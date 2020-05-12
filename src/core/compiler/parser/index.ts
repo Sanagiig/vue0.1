@@ -13,6 +13,7 @@ import {
   hasOwn,
   isIE, 
   isEdge, 
+  addAttr,
   isServerRendering,
   getAndRemoveAttr,
   getBindingAttr,
@@ -360,6 +361,7 @@ function processScopedSlots (el:any) {
   // 2. for each slot group, check if the group contains $slot
   for (const name in groups) {
     const group = groups[name]
+    // 当同一个 slotTarget 中某个ele 存在 $slot
     if (group.some(nodeHas$Slot)) {
       // 3. if a group contains $slot, all nodes in that group gets assigned
       // as a scoped slot to el and removed from children
@@ -368,11 +370,13 @@ function processScopedSlots (el:any) {
       const slotContainer = slots[name] = createASTElement('template', [], el)
       slotContainer.children = group
       slotContainer.slotScope = '$slot'
+      // 过滤存在 $slot 的节点
       el.children = (<any[]>el.children).filter(c => group.indexOf(c) === -1)
     }
   }
 }
 
+// 解析 <slot>  <xx slot-scope="">
 function processSlot (el:any) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
@@ -437,6 +441,131 @@ function processSlot (el:any) {
       // only for non-scoped slots.
       if (el.tag !== 'template' && !el.slotScope && !nodeHas$Slot(el)) {
         addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'))
+      }
+    }
+  }
+}
+
+function processComponent (el:any) {
+  let binding
+  if ((binding = getBindingAttr(el, 'is'))) {
+    el.component = binding
+  }
+  if (getAndRemoveAttr(el, 'inline-template') != null) {
+    el.inlineTemplate = true
+  }
+}
+
+function processAttrs (el:any) {
+  const list = el.attrsList
+  let i, l, name, rawName, value, modifiers:any, isProp, syncGen
+  for (i = 0, l = list.length; i < l; i++) {
+    name = rawName = list[i].name
+    value = list[i].value
+    // 判断是否是指令
+    if (dirRE.test(name)) {
+      // mark element as dynamic
+      el.hasBindings = true
+      // modifiers
+      modifiers = parseModifiers(name.replace(dirRE, ''))
+      // support .foo shorthand syntax for the .prop modifier
+      if (propBindRE.test(name)) {
+        (modifiers || (modifiers = {})).prop = true
+        console.log('name',name)
+        name = `.` + name.slice(1).replace(modifierRE, '')
+      } else if (modifiers) {
+        name = name.replace(modifierRE, '')
+      }
+      if (bindRE.test(name)) { // v-bind
+        name = name.replace(bindRE, '')
+        value = parseFilters(value)
+        isProp = false
+        if (  
+          process.env.NODE_ENV !== 'production' &&
+          value.trim().length === 0
+        ) {
+          warn(
+            `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
+          )
+        }
+        // 处理属性
+        if (modifiers) {
+          if (modifiers.prop) {
+            isProp = true
+            name = camelize(name)
+            if (name === 'innerHtml') name = 'innerHTML'
+          }
+          if (modifiers.camel) {
+            name = camelize(name)
+          }
+          if (modifiers.sync) { 
+            syncGen = genAssignmentCode(value, `$event`)
+            addHandler(
+              el,
+              `update:${camelize(name)}`,
+              syncGen,
+              null,
+              false,
+              warn,
+              list[i]
+            )
+            if (hyphenate(name) !== camelize(name)) {
+              addHandler(
+                el,
+                `update:${hyphenate(name)}`,
+                syncGen,
+                null,
+                false,
+                warn,
+                list[i]
+              )
+            }
+          }
+        }
+        if (isProp || (
+          !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
+        )) {
+          addProp(el, name, value, list[i])
+        } else {
+          addAttr(el, name, value, list[i])
+        }
+      } else if (onRE.test(name)) { // v-on
+        name = name.replace(onRE, '')
+        addHandler(el, name, value, modifiers, false, warn, list[i])
+      } else { // normal directives
+        name = name.replace(dirRE, '')
+        // parse arg
+        const argMatch = name.match(argRE)
+        const arg = argMatch && argMatch[1]
+        if (arg) {
+          name = name.slice(0, -(arg.length + 1))
+        }
+        addDirective(el, name, rawName, value, arg, modifiers, list[i])
+        if (process.env.NODE_ENV !== 'production' && name === 'model') {
+          checkForAliasModel(el, value)
+        }
+      }
+    } else {
+      // literal attribute
+      if (process.env.NODE_ENV !== 'production') {
+        const res = parseText(value, delimiters)
+        if (res) {
+          warn(
+            `${name}="${value}": ` +
+            'Interpolation inside attributes has been removed. ' +
+            'Use v-bind or the colon shorthand instead. For example, ' +
+            'instead of <div id="{{ val }}">, use <div :id="val">.',
+            list[i]
+          )
+        }
+      }
+      addAttr(el, name, JSON.stringify(value), list[i])
+      // #6887 firefox doesn't update muted state if set via attribute
+      // even immediately after element creation
+      if (!el.component &&
+          name === 'muted' &&
+          platformMustUseProp(el.tag, el.attrsMap.type, name)) {
+        addProp(el, name, 'true', list[i])
       }
     }
   }

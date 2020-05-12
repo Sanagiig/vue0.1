@@ -118,8 +118,13 @@ declare type ASTElement = {
   inlineTemplate?: true;
   transitionMode?: string | null;
   slotName?: string;
+  // 标签中 slot 属性
   slotTarget?: string;
+  // <template> scope 或 slot-scope 属性
   slotScope?: string;
+  // 如果子节点存在 $slot 则存在改属性 ， 
+  // 其 name 为 slotTarget , val 为一个空的 template 
+  // parent = curEle , children = group, slotScope = $slot
   scopedSlots?: { [name: string]: ASTElement };
 
   ref?: string;

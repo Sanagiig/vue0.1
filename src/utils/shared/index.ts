@@ -38,7 +38,7 @@ export function remove(arr: Array<any>, item: any): Array<any> | void {
 /**
  * Create a cached version of a pure function.
  */
-export function cached<F extends (s:string)=>any> (fn:F): F {
+export function cached<F extends (s:any)=>any> (fn:F): F {
   const cache = Object.create(null);
   const cachedFn =  (str: string): any =>{
     const hit = cache[str];
