@@ -17,6 +17,7 @@ import {
   getAndRemoveAttr,
   getBindingAttr,
   getRawBindingAttr,
+  addAttr,
 } from '@utils/index';
 
 export const onRE = /^@|^v-on:/;
@@ -593,6 +594,7 @@ function isForbiddenTag (el:any): boolean {
   )
 }
 
+// 判断子节点是否有 has$Slot 或有用到 $slot
 function childrenHas$Slot (el:any): boolean {
   return el.children ? el.children.some(nodeHas$Slot) : false
 }

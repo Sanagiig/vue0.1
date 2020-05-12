@@ -42,6 +42,15 @@ function rangeSetItem (
   return item
 }
 
+export function addAttr (
+  el: ASTElement, 
+  name: string,
+  value: any,
+  range?: Range) {
+  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
+}
+
 // add a raw attr (use this in preTransforms)
 export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
   el.attrsMap[name] = value
