@@ -149,44 +149,6 @@ export function parseHTML(html: any, options: any) {
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
-    } else {
-      // 非首个tag 解析 并 在 textTag 中
-      // </endTag> 的长度
-      let endTagLength = 0;
-      // 上一个 tag
-      const stackedTag = lastTag.toLowerCase();
-      const reStackedTag =
-        // 查看是否有之前的tag的正则缓存
-        reCache[stackedTag] || (reCache[stackedTag]
-          = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'));
-       // 去掉 .*</endTag> 
-      const rest = html.replace(reStackedTag, function (all:any, text:string, endTag:string) {
-        endTagLength = endTag.length;
-        if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
-          text = text
-            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
-            .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
-        }
-        if (shouldIgnoreFirstNewline(stackedTag, text)) {
-          text = text.slice(1);
-        }
-        if (options.chars) {
-          options.chars(text);
-        }
-        return '';
-      })
-      // endTag 后面的位置
-      index += html.length - rest.length;
-      html = rest;
-      parseEndTag(stackedTag, index - endTagLength, index);
-    }
-
-    if (html === last) {
-      options.chars && options.chars(html)
-      if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
-        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index + html.length })
-      }
-      break
     }
   }
   
@@ -218,7 +180,6 @@ export function parseHTML(html: any, options: any) {
       }
     }
   }
-
   function handleStartTag(match: any) { 
     const tagName = match.tagName
     const unarySlash = match.unarySlash
@@ -263,7 +224,6 @@ export function parseHTML(html: any, options: any) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
-
   function parseEndTag(tagName?: string, start?: number, end?: number) {
     // 当前tag 在栈中的位置
     let pos, 

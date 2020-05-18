@@ -90,7 +90,7 @@ function normalizeProps(options: ComponentOptions, vm?: Component) {
  * Normalize all injections into Object-based format
  */
 function normalizeInject(options: ComponentOptions, vm?: Component) {
-  const inject = options.inject;
+  const inject = <any>options.inject;
   if (!inject) return;
   const normalized: any = options.inject = {};
   if (Array.isArray(inject)) {
@@ -164,7 +164,7 @@ export function mergeOptions(
     }
   }
 
-  const options: ComponentOptions = {};
+  const options: ComponentOptions = <any>{};
   let key;
   for (key in parent) {
     mergeField(key);

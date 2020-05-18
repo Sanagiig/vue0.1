@@ -12,14 +12,19 @@ import {
   hyphenate,
   hasOwn,
   isIE, 
-  isEdge, 
+  isEdge,
+  isTextTag,
+  isForbiddenTag,
   addAttr,
+  addProp,
+  addDirective,
   isServerRendering,
   getAndRemoveAttr,
   getBindingAttr,
   getRawBindingAttr,
-  addAttr,
+  addHandler
 } from '@utils/index';
+import { genAssignmentCode } from '@core/compiler/directives/model';
 
 export const onRE = /^@|^v-on:/;
 export const dirRE = /^v-|^@|^:|^\./;
@@ -243,9 +248,108 @@ export function parse (
         closeElement(element)
       }
     },
-    end(tag: any, start: any, end: any) { },
-    chars(text: string, start: number, end: number) { },
-    comment(text: string, start: number, end: number) { }
+    end(tag: any, start: any, end: any) {
+      const element = stack[stack.length - 1]
+      if (!inPre) {
+        // remove trailing whitespace node
+        const lastNode = element.children[element.children.length - 1]
+        if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
+          element.children.pop()
+        }
+      }
+      // pop stack
+      stack.length -= 1
+      currentParent = stack[stack.length - 1]
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+        element.end = end
+      }
+      closeElement(element)
+    },
+    chars(text: string, start: number, end: number) {
+      if (!currentParent) {
+        if (process.env.NODE_ENV !== 'production') {
+          if (text === template) {
+            warnOnce(
+              'Component template requires a root element, rather than just text.',
+              { start }
+            )
+          } else if ((text = text.trim())) {
+            warnOnce(
+              `text "${text}" outside root element will be ignored.`,
+              { start }
+            )
+          }
+        }
+        return
+      }
+      // IE textarea placeholder bug
+      /* istanbul ignore if */
+      if (isIE &&
+        currentParent.tag === 'textarea' &&
+        currentParent.attrsMap.placeholder === text
+      ) {
+        return
+      }
+      const children = currentParent.children
+      console.log('text',text);
+      if (inPre || text.trim()) {
+        text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
+      } else if (!children.length) {
+        // 不为无子节点的元素添加空白文本节点
+        // remove the whitespace-only node right after an opening tag
+        text = ''
+      } else if (whitespaceOption) {
+        if (whitespaceOption === 'condense') {
+          // in condense mode, remove the whitespace node if it contains
+          // line break, otherwise condense to a single space
+          text = lineBreakRE.test(text) ? '' : ' '
+        } else {
+          text = ' '
+        }
+      } else {
+        text = preserveWhitespace ? ' ' : ''
+      }
+      if (text) {
+        if (whitespaceOption === 'condense') {
+          // condense consecutive whitespaces into single space
+          text = text.replace(whitespaceRE, ' ')
+        }
+        let res
+        let child:ASTNode | void
+        if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
+          child = {
+            type: 2,
+            expression: res.expression,
+            tokens: res.tokens,
+            text
+          }
+        } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
+          child = {
+            type: 3,
+            text
+          }
+        }
+        if (child) {
+          if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+            child.start = start
+            child.end = end
+          }
+          children.push(child)
+        }
+      }
+    },
+    comment(text: string, start: number, end: number) {
+      const child: ASTText = {
+        type: 3,
+        text,
+        isComment: true
+      }
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+        child.start = start
+        child.end = end
+      }
+      currentParent.children.push(child)
+    }
   })
   return root;
 }
@@ -347,6 +451,7 @@ function processRef (el:any) {
   }
 }
 
+// mark $slot ？？？
 function processScopedSlots (el:any) {
   // 1. group children by slot target
   const groups: any = {}
@@ -370,7 +475,7 @@ function processScopedSlots (el:any) {
       const slotContainer = slots[name] = createASTElement('template', [], el)
       slotContainer.children = group
       slotContainer.slotScope = '$slot'
-      // 过滤存在 $slot 的节点
+      // 过滤存在 $slot 的同组节点
       el.children = (<any[]>el.children).filter(c => group.indexOf(c) === -1)
     }
   }
@@ -456,6 +561,21 @@ function processComponent (el:any) {
   }
 }
 
+function parseModifiers (name: string): Object | void {
+  const match = name.match(modifierRE)
+  if (match) {
+    const ret:any = {}
+    match.forEach(m => { ret[m.slice(1)] = true })
+    return ret
+  }
+}
+
+/**
+ * 1. 处理dir 属性，并加上hasBindings标记
+ * 2. 处理modifiers,将其取出，并还原原本属性名称
+ * 3. 所有v-bind 的值将进行过滤器解析
+ * 4. 根据修饰符对属性进行操作
+ */
 function processAttrs (el:any) {
   const list = el.attrsList
   let i, l, name, rawName, value, modifiers:any, isProp, syncGen
@@ -469,13 +589,15 @@ function processAttrs (el:any) {
       // modifiers
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
+      // 去除修饰符，还原原本属性名称
       if (propBindRE.test(name)) {
         (modifiers || (modifiers = {})).prop = true
-        console.log('name',name)
+      
         name = `.` + name.slice(1).replace(modifierRE, '')
       } else if (modifiers) {
         name = name.replace(modifierRE, '')
       }
+
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         value = parseFilters(value)
@@ -488,7 +610,7 @@ function processAttrs (el:any) {
             `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
           )
         }
-        // 处理属性
+        // 处理修饰符
         if (modifiers) {
           if (modifiers.prop) {
             isProp = true
@@ -592,7 +714,7 @@ type ForParseResult = {
   iterator1?: string;
   iterator2?: string;
 };
-
+// mark
 export function parseFor (exp: string): ForParseResult | void {
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) return
@@ -713,17 +835,6 @@ function makeAttrsMap (attrs: Array<any>): Object {
   return map
 }
 
-function isForbiddenTag (el:any): boolean {
-  return (
-    el.tag === 'style' ||
-    (el.tag === 'script' && (
-      !el.attrsMap.type ||
-      el.attrsMap.type === 'text/javascript'
-    ))
-  )
-}
-
-// 判断子节点是否有 has$Slot 或有用到 $slot
 function childrenHas$Slot (el:any): boolean {
   return el.children ? el.children.some(nodeHas$Slot) : false
 }
@@ -746,4 +857,21 @@ function nodeHas$Slot (node:any): boolean {
     return (node.has$Slot = $slotRE.test(node.expression))
   }
   return false
+}
+
+function checkForAliasModel (el:any, value:any) {
+  let _el = el
+  while (_el) {
+    if (_el.for && _el.alias === value) {
+      warn(
+        `<${el.tag} v-model="${value}">: ` +
+        `You are binding v-model directly to a v-for iteration alias. ` +
+        `This will not be able to modify the v-for source array because ` +
+        `writing to the alias is like modifying a function local variable. ` +
+        `Consider using an array of objects and use v-model on an object property instead.`,
+        el.rawAttrsMap['v-model']
+      )
+    }
+    _el = _el.parent
+  }
 }

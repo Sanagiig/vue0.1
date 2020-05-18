@@ -1,13 +1,8 @@
-import { parseFilters } from '@utils/index';
-
+import { parseFilters,emptyObject } from '@utils/index';
 type Range = { start?: number, end?: number };
 
 export const unicodeLetters = 'a-zA-Z'
 
-/**
- * Return the same value.
- */
-export const identity = (_: any) => _;
 
 /**
  * Parse simple path.
@@ -42,15 +37,6 @@ function rangeSetItem (
   return item
 }
 
-export function addAttr (
-  el: ASTElement, 
-  name: string,
-  value: any,
-  range?: Range) {
-  (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
-  el.plain = false
-}
-
 // add a raw attr (use this in preTransforms)
 export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
   el.attrsMap[name] = value
@@ -59,6 +45,100 @@ export function addRawAttr (el: ASTElement, name: string, value: any, range?: Ra
 
 export function addAttr (el: ASTElement, name: string, value: any, range?: Range) {
   (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
+}
+
+export function addProp (el: ASTElement, name: string, value: string, range?: Range) {
+  (el.props || (el.props = [])).push(rangeSetItem({ name, value }, range))
+  el.plain = false
+}
+
+export function addDirective (
+  el: ASTElement,
+  name: string,
+  rawName: string,
+  value: string,
+  arg: string | null,
+  modifiers: ASTModifiers | null,
+  range?: Range
+) {
+  (el.directives || (el.directives = [])).push(rangeSetItem({ name, rawName, value, arg, modifiers }, range))
+  el.plain = false
+}
+
+export function addHandler (
+  el: ASTElement,
+  name: string,
+  value: string,
+  modifiers?: ASTModifiers | null,
+  important?: boolean,
+  warn?: Function | null,
+  range?: Range
+) {
+  modifiers = modifiers || emptyObject
+  // warn prevent and passive modifier
+  /* istanbul ignore if */
+  if (
+    process.env.NODE_ENV !== 'production' && warn &&
+    modifiers.prevent && modifiers.passive
+  ) {
+    warn(
+      'passive and prevent can\'t be used together. ' +
+      'Passive handler can\'t prevent default event.',
+      range
+    )
+  }
+
+  // normalize click.right and click.middle since they don't actually fire
+  // this is technically browser-specific, but at least for now browsers are
+  // the only target envs that have right/middle clicks.
+  if (name === 'click') {
+    if (modifiers.right) {
+      name = 'contextmenu'
+      delete modifiers.right
+    } else if (modifiers.middle) {
+      name = 'mouseup'
+    }
+  }
+
+  // check capture modifier
+  if (modifiers.capture) {
+    delete modifiers.capture
+    name = '!' + name // mark the event as captured
+  }
+  if (modifiers.once) {
+    delete modifiers.once
+    name = '~' + name // mark the event as once
+  }
+  /* istanbul ignore if */
+  if (modifiers.passive) {
+    delete modifiers.passive
+    name = '&' + name // mark the event as passive
+  }
+
+  let events
+  if (modifiers.native) {
+    delete modifiers.native
+    events = el.nativeEvents || (el.nativeEvents = {})
+  } else {
+    events = el.events || (el.events = {})
+  }
+
+  const newHandler: any = rangeSetItem({ value: value.trim() }, range)
+  if (modifiers !== emptyObject) {
+    newHandler.modifiers = modifiers
+  }
+
+  const handlers = events[name]
+  /* istanbul ignore if */
+  if (Array.isArray(handlers)) {
+    important ? handlers.unshift(newHandler) : handlers.push(newHandler)
+  } else if (handlers) {
+    events[name] = important ? [newHandler, handlers] : [handlers, newHandler]
+  } else {
+    events[name] = newHandler
+  }
+
   el.plain = false
 }
 

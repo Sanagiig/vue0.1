@@ -1,5 +1,5 @@
 import { noop } from '@utils/shared/index'
-import { parsePath } from '@utils/parser'
+import { parsePath } from '@utils/parser/index'
 import Dep, { pushTarget, popTarget } from './dep'
 import { traverse } from './traverse';
 import { queueWatcher } from './scheduler';

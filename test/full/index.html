@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app" :name="xx">
+      <div>
+        <div></div>
+      </div>
+      <div v-if="x"></div>
+      <div v-else-if="y"></div>
+      <div v-else></div>
+      <ul>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+      </ul>
+      {{ x1 | x2 | x3}}
+      <h2 v-for="item,index,key in list"></h2>
+      <h3 :xx="x | y | y" v-model="x | y | y"></h3>
+    </div>
+    <script src="./dist.js"></script>
+    <script>
+      window.onload = function () {
+        var vm = new Vvue({$el: '#app'})
+        var dom = document.getElementById('app');
+        var tmp = dom.outerHTML;
+        var ast = Vvue.compile(tmp)
+        console.log("ast", ast)
+        console.log('vm', vm)
+      }
+    </script>
+  </body>
+</html>

@@ -4,41 +4,81 @@ declare type InternalComponentOptions = {
     _parentVnode: VNodeInstance;
     render?: Function;
     staticRenderFns?: Array<Function>
-  };
+};
 
+  type InjectKey = string | Symbol;
 declare type ComponentOptions = {
+    componentId?: string;
+  
     // data
-    data?:{ [key: string]: any };
+    data?: Object | Function;
     props?: { [key: string]: PropOptions };
     propsData?: any;
-    // 类似抽象类
-    abstract?: boolean;
-    provide?: { [key: string]: any };
-    inject?: { [key: string]: any };
-    methods?: { [key: string]: any };
-    computed?: { [key: string]: any };
-    watch?: { [key: string]: any };
-    
+    computed?: {
+      [key: string]: Function | {
+        get?: Function;
+        set?: Function;
+        cache?: boolean
+      }
+    };
+    methods?: { [key: string]: Function };
+    watch?: { [key: string]: Function | string };
+  
+    // DOM
+    el?: string | Element;
+    template?: string;
+    render: (h: () => VNodeInstance) => VNodeInstance;
+    renderError?: (h: () => VNodeInstance, err: Error) => VNodeInstance;
+    staticRenderFns?: Array<() => VNodeInstance>;
+  
+    // lifecycle
+    beforeCreate?: Function;
+    created?: Function;
+    beforeMount?: Function;
+    mounted?: Function;
+    beforeUpdate?: Function;
+    updated?: Function;
+    activated?: Function;
+    deactivated?: Function;
+    beforeDestroy?: Function;
+    destroyed?: Function;
+    errorCaptured?: () => boolean | void;
+    ssrPrefetch?: Function;
+  
     // assets
     directives?: { [key: string]: Object };
-    components?: { [key: string]: Component };
+    components?: { [key: string]: ComponentCtor };
+    transitions?: { [key: string]: Object };
     filters?: { [key: string]: Function };
-    parent: Component;
-    render?: Function;
-    staticRenderFns?: Array<Function>
-
-    // private
-    _isComponent: boolean;
-    // 使用Vue.extend 时会为options生成，key为父Vue 的cid
-    _Ctor: {
-        [key:number] : ComponentCtor
+  
+    // context
+    provide?: () => { [key: string ]: any } | { [key: string ]: any };
+    inject?: { [key: string]: InjectKey | { from?: InjectKey, default?: any }} | Array<string>;
+  
+    // component v-model customization
+    model?: {
+      prop?: string;
+      event?: string;
     };
-    _base: ComponentCtor
-    _parentVnode: VNodeInstance;
-    _parentListeners?: { [key: string]:any };
+  
+    // misc
+    parent?: Component;
+    mixins?: Array<ComponentOptions | ComponentCtor>;
+    name?: string;
+    extends?: ComponentCtor | ComponentOptions;
+    delimiters?: [string, string];
+    comments?: boolean;
+    inheritAttrs?: boolean;
+  
+    // private
+    _isComponent?: true;
+    _propKeys?: string[];
+    _parentVnode?: VNodeInstance | void;
+    _parentListeners?: Object;
     _renderChildren?: VNodeInstance[];
     _componentTag: string;
     _scopeId: string;
+    _base: ComponentCtor;
     [key: string]: any | void;
 }
 

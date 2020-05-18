@@ -1,8 +1,6 @@
-import { isDef, isTrue, warn } from "@utils/index";
+import { isDef, isTrue, warn,isRegExp } from "@utils/index";
 import VNode, { cloneVNode } from "./vnode";
 import config from "@config/index";
-import { isRegExp } from "util";
-import {} from "@utils/index";
 import { isPrimitive, isUndef, isTextInputType } from '../../utils/assert';
 import { activeInstance } from "../instance/lifecycle";
 import { setTextContent, tagName, parentNode } from '../../utils/node-ops';
@@ -90,7 +88,7 @@ export function createPatchFunction(backend: any) {
         config.ignoredElements.length &&
         config.ignoredElements.some((ignore) => {
           return isRegExp(ignore)
-            ? ignore.test(<string>vnode.tag)
+            ? (<RegExp>ignore).test(<string>vnode.tag)
             : ignore === vnode.tag;
         })
       ) &&

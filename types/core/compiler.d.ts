@@ -105,6 +105,7 @@ declare type ASTElement = {
   staticRoot?: boolean;
   staticInFor?: boolean;
   staticProcessed?: boolean;
+  // 有指令属性
   hasBindings?: boolean;
 
   text?: string;

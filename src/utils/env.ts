@@ -12,6 +12,10 @@ export const inWeex = false // typeof WXEnvironment !== 'undefined' && !!WXEnvir
 export const isIE = UA && /msie|trident/.test(UA)
 export const isEdge = UA && UA.indexOf('edge/') > 0
 export const isIOS = false //(UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios')
+/**
+ * Return the same value.
+ */
+export const identity = (_: any) => _;
 
 // this needs to be lazy-evaled because vue may be required before
 // vue-server-renderer can set VUE_ENV

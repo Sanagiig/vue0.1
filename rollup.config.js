@@ -2,12 +2,27 @@ import path from 'path';
 import json from 'rollup-plugin-json';
 import typescript from 'rollup-plugin-typescript2';
 import tsCompiler from 'typescript';
+import resolve from 'rollup-plugin-node-resolve'
+import cjs from 'rollup-plugin-commonjs'
+import alias from 'rollup-plugin-alias';
 import replace from 'rollup-plugin-replace';
-const target = 'ob';
+const target = 'full';
 
 let baseIO;
 
 switch (target) {
+    case 'full':{
+        baseIO = {
+            input:'src/platform/entry/with-compiler.ts',
+            output:{
+                sourcemap:true,
+                file:'test/full/dist.js',
+                name:'Vvue',
+                format:'umd',
+            },
+        }
+        break;
+    }
     case 'ob':
         baseIO = {
             input: 'test/observer/index.ts',
@@ -18,17 +33,25 @@ switch (target) {
                 format: 'iife'
             }
         };
+        break;
+    case 'compiler':
+        baseIO = {
+            
+        }
 }
 export default {
     ...baseIO,
     plugins: [
-        json(),
+        resolve(),
+        cjs(),
         replace({
-            'process.env.NODE_ENV': process.env.NODE_ENV
+            'process.env.NODE_ENV': process.env.NODE_ENV,
+            // 'he':"'./entity-decoder'"
         }),
         typescript({
             typescript: tsCompiler,
             tsconfig: path.resolve(__dirname, 'tsconfig.json')
-        })
+        }),
+        // alias({ he: './entity-decoder' }),
     ],
 };

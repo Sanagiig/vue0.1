@@ -9,7 +9,7 @@ import { initState } from './state';
 let uid = 0;
 export function initMixin(Vue: ComponentCtor) {
   Vue.prototype._init = function (
-    this: Component, options?: ComponentOptions) {
+    this: Component, options?: ComponentOptions | InternalComponentOptions) {
     const vm = this;
     vm._uid = uid++;
 
@@ -30,7 +30,7 @@ export function initMixin(Vue: ComponentCtor) {
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       // 组件的$options = vm.constructor.options
-      initInternalComponent(vm, options);
+      initInternalComponent(vm, <InternalComponentOptions>options);
     } else {
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),

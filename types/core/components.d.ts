@@ -29,7 +29,7 @@ declare interface Component {
     $emit: Function;
     $watch: Function;
     $mount: Function;
-    $parent: Component;
+    $parent?: Component;
     $root: Component;
     $refs: { [key: string]: any };
     $slots: VNodeInstance[];

@@ -21,7 +21,7 @@ export function renderMixin(Vue: ComponentCtor) {
     return nextTick;
   }
 
-  Vue.prototype._render = function (tihs:Comment): VNode{
+  Vue.prototype._render = function (tihs:Comment): VNodeInstance{
     const vm = this;
     const { render, _parentVnode } = vm.$options;
 
@@ -36,7 +36,7 @@ export function renderMixin(Vue: ComponentCtor) {
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode;
     // render self
-    let vnode: VNode;
+    let vnode: VNodeInstance;
     try {
       vnode = render.call(vm._renderProxy, vm.$createElement);
     } catch (e) {

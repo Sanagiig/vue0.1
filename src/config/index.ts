@@ -52,6 +52,11 @@ const config: Config = {
     isReservedAttr: no,
 
     /**
+     * Ignore certain custom elements
+     */
+    ignoredElements: [],
+
+    /**
      * Get the namespace of an element
      */
     getTagNamespace: noop,

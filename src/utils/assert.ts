@@ -10,6 +10,10 @@ export function isNative (Ctor: any): boolean {
   return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
 }
 
+export function isRegExp (v: any): boolean {
+  return _toString.call(v) === '[object RegExp]'
+}
+
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
 export function isUndef (v: any): boolean {
@@ -126,6 +130,22 @@ export const isReservedTag = (tag: string): boolean | void => {
 // these are reserved for web because they are directly compiled away
 // during template compilation
 export const isReservedAttr = makeMap('style,class');
+
+// for script (e.g. type="x/template") or style, do not decode content
+export function isTextTag (el:any): boolean {
+  return el.tag === 'script' || el.tag === 'style'
+}
+
+export function isForbiddenTag (el:any): boolean {
+  return (
+    el.tag === 'style' ||
+    (el.tag === 'script' && (
+      !el.attrsMap.type ||
+      el.attrsMap.type === 'text/javascript'
+    ))
+  )
+}
+
 
 /**
  * Check if an attribute is a reserved attribute.

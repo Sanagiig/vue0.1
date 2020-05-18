@@ -12,7 +12,7 @@ import { compileToFunctions } from '@platform/compiler/index';
 const idToTemplate = cached((id:string | Element) => {
   const el = query(id);
   return el && el.innerHTML;
-})
+}) 
 
 const mount = Vue.prototype.$mount;
 Vue.prototype.$mount = function (
@@ -33,7 +33,7 @@ Vue.prototype.$mount = function (
   const options = this.$options;
   // resolve template/el and convert to render function
   if (!options.render) {
-    let template = options.template;
+    let template:any = options.template;
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {

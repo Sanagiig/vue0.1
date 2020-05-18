@@ -31,7 +31,7 @@ declare interface WatcherInstance {
     before?: Function;
     getter: Function;
     value: any;
-  
+    run:Function;
 }
   
 declare type WatcherOption = {

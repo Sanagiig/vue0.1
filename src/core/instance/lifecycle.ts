@@ -45,7 +45,7 @@ export function mountComponent(
 ): Component | any {
   vm.$el = <Element>el;
   if (!vm.$options.render) {
-    vm.$options.render = createEmptyVNode;
+    vm.$options.render = <any>createEmptyVNode;
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
       if ((vm.$options.template && vm.$options.template.charAt(0) !== '#')

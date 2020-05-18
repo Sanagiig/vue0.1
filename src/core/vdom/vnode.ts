@@ -69,7 +69,7 @@ export default class VNode {
   }
 }
 
-export const createEmptyVNode = (text: string = ''): VNode => {
+export const createEmptyVNode = (text: string = ''): VNodeInstance => {
   const node = new VNode();
   node.text = text;
   node.isComment = true;

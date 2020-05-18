@@ -1,6 +1,5 @@
-import { noop } from '@utils/shared/index';
+import { noop,isIE, isIOS, isNative } from '@utils/index';
 import { handleError } from '@utils/error';
-import { isIE, isIOS, isNative } from '@utils/env';
 
 const callbacks: Function[] = [];
 let pending = false;

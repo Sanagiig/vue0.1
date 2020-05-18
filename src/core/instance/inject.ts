@@ -20,7 +20,7 @@ export function resolveInject(inject: any, vm: Component): any {
       // #6574 in case the inject object is observed...
       if (key === '__ob__') continue;
       const provideKey = inject[key].from;
-      let source: Component = vm;
+      let source: Component | undefined = vm;
       while (source) {
         if (source._provided && hasOwn(source._provided, provideKey)) {
           result[key] = source._provided[provideKey];

@@ -1,4 +1,8 @@
 import model from './model';
-export default {
-
-};
+import klass from './class';
+import style from './style';
+export default [
+  model,
+  klass,
+  style
+];
