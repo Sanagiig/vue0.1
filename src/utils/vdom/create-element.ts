@@ -37,6 +37,7 @@ export function _createElement(
   children?: any,
   normalizationType?: number
 ): VNodeInstance | Array<VNodeInstance> | VNode{
+  // 不接受OB data对象
   if (isDef(data) && isDef((<any>data).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +

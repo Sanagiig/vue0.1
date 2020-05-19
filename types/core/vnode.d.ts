@@ -102,6 +102,8 @@ declare type VNodeComponentOptions = {
   tag?: string;
 };
 
+declare type VNodeChildren = Array<VNodeInstance | string> | string;
+
 declare type VNodeDirective = {
   name: string;
   rawName: string;
@@ -113,3 +115,9 @@ declare type VNodeDirective = {
 };
 
 declare type ScopedSlotsData = Array<{ key: string, fn: Function }>;
+
+declare type RenderFn = (
+  val: any,
+  keyOrIndex: string | number,
+  index?: number
+) => VNodeInstance

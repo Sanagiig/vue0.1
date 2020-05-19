@@ -1,5 +1,5 @@
 import { cached } from '../shared/index';
-
+import { isPlainObject } from '../assert';
 /**
  * Get the raw type string of a value, e.g., [object Object].
  */
@@ -87,6 +87,26 @@ function polyfillBind (fn: Function, ctx: Object): Function {
 
 function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
+}
+
+/**
+ * Convert an input value to a number for persistence.
+ * If the conversion fails, return original string.
+ */
+export function toNumber (val: string): number | string {
+  const n = parseFloat(val)
+  return isNaN(n) ? val : n
+}
+
+/**
+ * Convert a value to a string that is actually rendered.
+ */
+export function toString (val: any): string {
+  return val == null
+    ? ''
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
+      ? JSON.stringify(val, null, 2)
+      : String(val)
 }
 
 export const bind = Function.prototype.bind

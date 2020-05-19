@@ -78,3 +78,23 @@ export function getOuterHTML (el: Element): string {
     return container.innerHTML
   }
 }
+
+/**
+ * Check if two values are loosely equal - that is,
+ * if they are plain objects, do they have the same shape?
+ */
+export function looseEqual (a: any, b: any): boolean {
+  return true;
+}
+
+/**
+ * Return the first index at which a loosely equal value can be
+ * found in the array (if value is a plain object, the array must
+ * contain an object of the same shape), or -1 if it is not present.
+ */
+export function looseIndexOf (arr: Array<any>, val: any): number {
+  for (let i = 0; i < arr.length; i++) {
+    if (looseEqual(arr[i], val)) return i
+  }
+  return -1
+}

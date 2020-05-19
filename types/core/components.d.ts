@@ -71,5 +71,56 @@ declare interface Component {
     _installedPlugins: any[];
     _update: Function;
 
-    [key: string]: any;
+    // createElement
+
+  // _c is internal that accepts `normalizationType` optimization hint
+  _c: (
+    vnode?: VNodeInstance,
+    data?: VNodeData,
+    children?: VNodeChildren,
+    normalizationType?: number
+  ) => VNodeInstance | void;
+
+  // renderStatic
+  _m: (index: number, isInFor?: boolean) => VNodeInstance | VNodeChildren;
+  // markOnce
+  _o: (vnode: VNodeInstance | Array<VNodeInstance>, index: number, key: string) => VNodeInstance | VNodeChildren;
+  // toString
+  _s: (value: any) => string;
+  // text to VNode
+  _v: (value: string | number) => VNodeInstance;
+  // toNumber
+  _n: (value: string) => number | string;
+  // empty vnode
+  _e: () => VNodeInstance;
+  // loose equal
+  _q: (a: any, b: any) => boolean;
+  // loose indexOf
+  _i: (arr: Array<any>, val: any) => number;
+  // resolveFilter
+  _f: (id: string) => Function;
+  // renderList
+  _l: (val: any, render: RenderFn) => Array<VNodeInstance>;
+  // renderSlot
+  _t: (name: string, fallback: Array<VNodeInstance>, props: any,bindObject: any) => Array<VNodeInstance>;
+  // apply v-bind object
+  _b: (data: any, tag: string, value: any, asProp: boolean, isSync?: boolean) => VNodeData;
+  // apply v-on object
+  _g: (data: any, value: any) => VNodeData;
+  // check custom keyCode
+  _k: (eventKeyCode: number, key: string, builtInAlias?: number | Array<number>, eventKeyName?: string,builtInKeyName?: string | Array<string>) => boolean | undefined;
+  // resolve scoped slots
+  _u: (scopedSlots: ScopedSlotsData, res?: any) => { [key: string]: Function };
+
+  // SSR specific
+  _ssrNode: Function;
+  _ssrList: Function;
+  _ssrEscape: Function;
+  _ssrAttr: Function;
+  _ssrAttrs: Function;
+  _ssrDOMProps: Function;
+  _ssrClass: Function;
+  _ssrStyle: Function;
+
+  [key: string]: any;
 }
