@@ -1,7 +1,6 @@
 import { ASSET_TYPES } from '@utils/shared/constants';
 import { validateComponentName } from '@utils/options';
 import { isPlainObject } from '@utils/assert';
-import { def } from '../../utils/shared/index';
 
 export function initAssetRegisters(Vue: GlobalAPI) {
     ASSET_TYPES.forEach((type) => {

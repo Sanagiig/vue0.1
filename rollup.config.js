@@ -11,14 +11,14 @@ const target = 'full';
 let baseIO;
 
 switch (target) {
-    case 'full':{
+    case 'full': {
         baseIO = {
-            input:'src/platform/entry/with-compiler.ts',
-            output:{
-                sourcemap:true,
-                file:'test/full/dist.js',
-                name:'Vvue',
-                format:'umd',
+            input: 'src/platform/entry/with-compiler.ts',
+            output: {
+                sourcemap: true,
+                file: 'test/full/dist.js',
+                name: 'Vvue',
+                format: 'umd',
             },
         }
         break;
@@ -36,7 +36,7 @@ switch (target) {
         break;
     case 'compiler':
         baseIO = {
-            
+
         }
 }
 export default {
@@ -48,10 +48,12 @@ export default {
             'process.env.NODE_ENV': process.env.NODE_ENV,
             // 'he':"'./entity-decoder'"
         }),
+        alias({
+            he: './entity-decoder'
+        }),
         typescript({
             typescript: tsCompiler,
             tsconfig: path.resolve(__dirname, 'tsconfig.json')
         }),
-        // alias({ he: './entity-decoder' }),
     ],
 };

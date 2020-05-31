@@ -1,37 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-  </head>
-  <body>
-    <div id="app" :name="xx">
-      <div>
-        <div></div>
-      </div>
-      <div v-if="x"></div>
-      <div v-else-if="y"></div>
-      <div v-else></div>
-      <ul>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-      </ul>
-      {{ x1 | x2 | x3}}
-      <h2 v-for="item,index,key in list"></h2>
-      <h3 :xx="x | y | y" v-model="x | y | y"></h3>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <un-xx id="unxx"></un-xx>
+  <button id="btn">click</button>
+  <input id="input" type="text">
+  <div id="app">
+    <div ref="div">
+      <button id="xx" @click.native="click">click</button>
+      {{x1}}
     </div>
-    <script src="./dist.js"></script>
-    <script>
-      window.onload = function () {
-        var vm = new Vvue({$el: '#app'})
-        var dom = document.getElementById('app');
-        var tmp = dom.outerHTML;
-        var ast = Vvue.compile(tmp)
-        console.log("ast", ast)
-        console.log('vm', vm)
-      }
-    </script>
-  </body>
+  </div>
+  <script src="./dist.js"></script>
+  <script>
+    window.onload = function () {
+      var vm = new Vvue({
+        el: '#app',
+        data() {
+          return {
+            x1: 22
+          }
+        },
+        methods: {
+          click() {
+            console.log(this.x1)
+            this.x1++;
+          }
+        },
+      })
+
+      // document.getElementById('xx').addEventListener('click', function (e) {
+      //   vm.x1++;
+      // })
+      // var dom = document.getElementById('app');
+      // var tmp = dom.outerHTML;
+      // var ast = Vvue.compile(tmp)
+      console.log('vm', vm)
+      console.log(document.getElementById('unxx').tagName)
+      document.getElementById('btn').addEventListener('click', function (e) {
+        console.log(e)
+      })
+    }
+  </script>
+</body>
+
 </html>

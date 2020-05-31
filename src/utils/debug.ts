@@ -70,10 +70,12 @@ if (process.env.NODE_ENV !== 'production') {
       while (vm) {
         if (tree.length > 0) {
           const last = tree[tree.length - 1]
+          // 如果vm 属于同一个ctor 则不入栈
           if (last.constructor === vm.constructor) {
             currentRecursiveSequence++
             vm = vm.$parent
             continue
+            // 非首个不相同ctor 的vm 将入栈，并在上一个栈中增加计数器
           } else if (currentRecursiveSequence > 0) {
             tree[tree.length - 1] = [last, currentRecursiveSequence]
             currentRecursiveSequence = 0

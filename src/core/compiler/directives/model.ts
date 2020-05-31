@@ -1,4 +1,34 @@
 /**
+ * Cross-platform code generation for component v-model
+ */
+export function genComponentModel (
+  el: ASTElement,
+  value: string,
+  modifiers: ASTModifiers
+): boolean | void {
+  const { number, trim } = modifiers || {}
+
+  const baseValueExpression = '$$v'
+  let valueExpression = baseValueExpression
+  if (trim) {
+    valueExpression =
+      `(typeof ${baseValueExpression} === 'string'` +
+      `? ${baseValueExpression}.trim()` +
+      `: ${baseValueExpression})`
+  }
+  if (number) {
+    valueExpression = `_n(${valueExpression})`
+  }
+  const assignment = genAssignmentCode(value, valueExpression)
+
+  el.model = {
+    value: `(${value})`,
+    expression: JSON.stringify(value),
+    callback: `function (${baseValueExpression}) {${assignment}}`
+  }
+}
+
+/**
  * Parse a v-model expression into a base path and a final key segment.
  * Handles both dot-path and possible square brackets.
  *

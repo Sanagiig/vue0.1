@@ -6,13 +6,12 @@ import { lifecycleMixin } from './lifecycle'
 import { warn } from '@utils/debug';
 
 var Vue: any = function (this: Component, options: ComponentOptions) {
-    console.log("vue is",Vue);
     if (process.env.NODE_ENV !== 'production' &&
         !(this instanceof Vue)
     ) {
         warn('Vue is a constructor and should be called with the `new` keyword')
     }
-    // this._init(options);
+    this._init(options);
 }
 
 initMixin(Vue);

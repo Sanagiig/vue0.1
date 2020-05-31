@@ -47,6 +47,7 @@ export function createFnInvoker(
   return invoker;
 }
 
+// 为组件更新事件监听
 export function updateListeners(
   on: any,
   oldOn: any,
@@ -88,6 +89,7 @@ export function updateListeners(
     }
   }
 
+  // 删除old 多余事件监听
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name);

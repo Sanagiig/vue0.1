@@ -1,4 +1,4 @@
-import Vue from '@platform/runtime/index';
+import Vue from '@platform/web/runtime/index';
 import {
   cached,
   query,
@@ -7,7 +7,7 @@ import {
   shouldDecodeNewlines,
   shouldDecodeNewlinesForHref
 } from '@utils/index';
-import { compileToFunctions } from '@platform/compiler/index';
+import { compileToFunctions } from '@platform/web/compiler/index';
 
 const idToTemplate = cached((id:string | Element) => {
   const el = query(id);

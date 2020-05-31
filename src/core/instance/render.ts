@@ -18,7 +18,7 @@ export function renderMixin(Vue: ComponentCtor) {
   installRenderHelpers(Vue.prototype);
 
   Vue.prototype.$nextTick = function (fn: Function) {
-    return nextTick;
+    return nextTick(fn, this);
   }
 
   Vue.prototype._render = function (tihs:Comment): VNodeInstance{

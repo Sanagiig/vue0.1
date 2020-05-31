@@ -115,6 +115,7 @@ export function initEvents(vm: Component) {
   // init parent attached events
   const listeners = vm.$options._parentListeners;
   if (listeners) {
+    // 为子组件新增父组件的监听方法
     updateComponentListeners(vm, listeners);
   }
 }

@@ -44,8 +44,8 @@ export function generate (
   const state = new CodegenState(options)
   const code = ast ? genElement(ast, state) : '_c("div")'
   return {
-    render: '',
-    staticRenderFns:[]
+    render: `with(this){return ${code}}`,
+    staticRenderFns: state.staticRenderFns
   }
 }
 
@@ -308,7 +308,8 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
     dir = dirs[i]
     needRuntime = true
     const gen: DirectiveFunction = state.directives[dir.name]
-    if (gen) {
+    console.log("state.directives",state.directives)
+    if (typeof gen === 'function') {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
       needRuntime = !!gen(el, dir, state.warn)

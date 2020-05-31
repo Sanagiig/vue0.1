@@ -115,6 +115,14 @@ export const isSVG = makeMap(
   true
 )
 
+export const isXlink = (name: string): boolean => {
+  return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
+}
+
+export const isFalsyAttrValue = (val: any): boolean => {
+  return val == null || val === false
+}
+
 /**
  * Check if a string starts with $ or _
  */

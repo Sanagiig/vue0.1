@@ -1,10 +1,9 @@
-import { isPrimitive, isTrue, isDef } from '../assert';
-import { createEmptyVNode } from '../../core/vdom/vnode';
-import { warn } from '../debug';
+import { isPrimitive, isTrue, isDef,isUndef,isObject,warn } from '@utils/index';
+import VNode,{ createEmptyVNode } from '@core/vdom/vnode';
 import { normalizeChildren, simpleNormalizeChildren } from './normalize-children';
 import config from '@config/index';
-import VNode from '../../core/vdom/vnode';
 import { createComponent } from './create-component';
+import { traverse } from '@core/observer/traverse';
 
 const SIMPLE_NORMALIZE = 1;
 const ALWAYS_NORMALIZE = 2;
@@ -104,9 +103,34 @@ export function _createElement(
   }
 }
 
-function applyNS (vnode:any, ns:any, force?:any) {}
+// 更新除svg外的子节点SN
+function applyNS (vnode:any, ns:any, force?:any) {
+  vnode.ns = ns
+  if (vnode.tag === 'foreignObject') {
+    // use default namespace inside foreignObject
+    ns = undefined
+    force = true
+  }
+  if (isDef(vnode.children)) {
+    for (let i = 0, l = vnode.children.length; i < l; i++) {
+      const child = vnode.children[i]
+      if (isDef(child.tag) && (
+        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
+        applyNS(child, ns, force)
+      }
+    }
+  }
+}
 
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-function registerDeepBindings (data:any) {}
+// 收集 :style :class 依赖
+function registerDeepBindings (data:any) {
+  if (isObject(data.style)) {
+    traverse(data.style)
+  }
+  if (isObject(data.class)) {
+    traverse(data.class)
+  }
+}

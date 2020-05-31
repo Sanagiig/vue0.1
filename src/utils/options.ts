@@ -6,7 +6,9 @@ import {
   toRawType,
   isBuiltInTag,
   isPlainObject,
-  extend } from './index';
+  extend,
+  hasOwn,
+  capitalize} from './index';
 import config from '@config/index';
 
 /**
@@ -170,10 +172,49 @@ export function mergeOptions(
     mergeField(key);
   }
 
+  for (key in child) {
+    if (!hasOwn(parent, key)) {
+      mergeField(key)
+    }
+  }
+
   function mergeField(key: string) {
     const strat = strats[key] || defaultStrat;
     options[key] = strat(parent[key], child[key], vm, key);
   }
 
   return options;
+}
+
+/**
+ * Resolve an asset.
+ * This function is used because child instances need access
+ * to assets defined in its ancestor chain.
+ */
+export function resolveAsset (
+  options: any,
+  type: string,
+  id: string,
+  warnMissing?: boolean
+): any {
+  /* istanbul ignore if */
+  if (typeof id !== 'string') {
+    return
+  }
+  const assets = options[type]
+  // check local registration variations first
+  if (hasOwn(assets, id)) return assets[id]
+  const camelizedId = camelize(id)
+  if (hasOwn(assets, camelizedId)) return assets[camelizedId]
+  const PascalCaseId = capitalize(camelizedId)
+  if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
+  // fallback to prototype chain
+  const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
+  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+    warn(
+      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
+      options
+    )
+  }
+  return res
 }

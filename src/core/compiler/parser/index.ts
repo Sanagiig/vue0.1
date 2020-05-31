@@ -1,4 +1,4 @@
-import he from 'he';
+import he from './entity-decoder';
 import { parseHTML } from './html-parser';
 import { parseText } from './text-parser';
 import { parseFilters } from './filter-parser';
@@ -291,7 +291,6 @@ export function parse (
         return
       }
       const children = currentParent.children
-      console.log('text',text);
       if (inPre || text.trim()) {
         text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
       } else if (!children.length) {

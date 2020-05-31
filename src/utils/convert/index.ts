@@ -1,5 +1,7 @@
 import { cached } from '../shared/index';
 import { isPlainObject } from '../assert';
+import { extend } from '../mixin';
+
 /**
  * Get the raw type string of a value, e.g., [object Object].
  */
@@ -107,6 +109,19 @@ export function toString (val: any): string {
     : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
+}
+
+/**
+ * Merge an Array of Objects into a single Object.
+ */
+export function toObject (arr: Array<any>): Object {
+  const res = {}
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i]) {
+      extend(res, arr[i])
+    }
+  }
+  return res
 }
 
 export const bind = Function.prototype.bind

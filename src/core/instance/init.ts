@@ -66,7 +66,7 @@ export function initMixin(Vue: ComponentCtor) {
     //   mark(endTag)
     //   measure(`vue ${vm._name} init`, startTag, endTag)
     // }
-
+    console.log('vm.$options',vm.$options)
     if (vm.$options.el) {
       vm.$mount(vm.$options.el);
     }

@@ -15,9 +15,28 @@ export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false;
 
 function isInInactiveTree (vm:any) {
+  while (vm && (vm = vm.$parent)) {
+    if (vm._inactive) return true
+  }
+  return false
 }
 
 export function activateChildComponent(vm: Component, direct?: boolean) {
+  if (direct) {
+    vm._directInactive = false
+    if (isInInactiveTree(vm)) {
+      return
+    }
+  } else if (vm._directInactive) {
+    return
+  }
+  if (vm._inactive || vm._inactive === null) {
+    vm._inactive = false
+    for (let i = 0; i < vm.$children.length; i++) {
+      activateChildComponent(vm.$children[i])
+    }
+    callHook(vm, 'activated')
+  }
 }
 
 export function callHook(vm: Component | any, hook: string) {
@@ -65,7 +84,7 @@ export function mountComponent(
     }
   }
   callHook(vm, 'beforeMount');
-
+  console.log('render',vm._render())
   let updateComponent;
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -131,6 +150,7 @@ export function lifecycleMixin(Vue: ComponentCtor) {
     const prevVnode = vm._vnode;
     const restoreActiveInstance = setActiveInstance(vm);
     vm._vnode = vnode;
+    console.log('vnode',prevVnode, vnode)
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {

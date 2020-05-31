@@ -7,6 +7,8 @@ import {
   toggleObserving,
   defineReactive
 } from '@observer/index';
+
+// 解析 inject 中的注入属性（from）
 export function resolveInject(inject: any, vm: Component): any {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached

@@ -1,12 +1,12 @@
 import { no,noop } from '@utils/index';
 import { identity } from '../utils/env';
 
-const config: Config = {
+const config = {
      /**
      * Option merge strategies (used in core/util/options)
      */
     // $flow-disable-line
-    optionMergeStrategies: {},
+    optionMergeStrategies: <any>{},
 
     /**
      * Whether to suppress warnings.
@@ -15,12 +15,12 @@ const config: Config = {
     /**
      * Error handler for watcher errors
      */
-    errorHandler: null,
+    errorHandler: undefined,
     
     /**
      * Warn handler for watcher warns
      */
-    warnHandler: null,
+    warnHandler: undefined,
     
     /**
      * Whether to enable devtools
@@ -75,6 +75,18 @@ const config: Config = {
      * Whether to record perf
      */
     performance: false,
+
+    /**
+     * Check if an attribute must be bound using property, e.g. value
+     * Platform-dependent.
+     */
+    mustUseProp: no,
+
+    /**
+     * Custom user key aliases for v-on
+     */
+    // $flow-disable-line
+    keyCodes: Object.create(null),
 }
 
 export default config;

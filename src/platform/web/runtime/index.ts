@@ -26,7 +26,6 @@ Vue.config.isUnknownElement = isUnknownElement;
 
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
-
 // public mount method
 Vue.prototype.$mount = function (
   el: string | Element | null,

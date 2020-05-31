@@ -57,12 +57,15 @@ export function getData(data: Function, vm: Component): any {
   }
 }
 
+// 将计算属性的 get() 赋值到 vm 属性的get()
 export function defineComputed(
   target: any,
   key: string,
   userDef: any | Function
 ) {
   const shouldCache = !isServerRendering();
+  // 如果计算属性 fn 拥有 get 或 userDef.get , 
+  // 则vm[key] 的get 与 watch.evaluate 相关联并且当前watcher 会 调用depend 收集依赖
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = userDef.get
       ? createComputedGetter(key)
@@ -342,7 +345,7 @@ function initComputed(vm: Component, computed: any) {
 }
 
 function initMethods(vm: Component, methods: any) {
-  const props = vm.$props.props;
+  const props = vm.$options.props;
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
       if (typeof methods[key] !== 'function') {
