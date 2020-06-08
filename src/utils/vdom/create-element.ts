@@ -29,6 +29,7 @@ export function createElement(
   return _createElement(context, tag, data, children, normalizationType);
 }
 
+// 根据参数返回vnode 或 component
 export function _createElement(
   context: Component,
   tag?: string | ComponentCtor | Function | any,

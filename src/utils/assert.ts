@@ -160,6 +160,7 @@ export function isForbiddenTag (el:any): boolean {
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
 
+// svg && math
 export function getTagNamespace (tag: string): string | void {
   if (isSVG(tag)) {
     return 'svg'
@@ -172,6 +173,7 @@ export function getTagNamespace (tag: string): string | void {
 }
 
 const unknownElementCache = Object.create(null)
+// 判断是否属于未知标签
 export function isUnknownElement (tag: string): boolean {
   /* istanbul ignore if */
   if (!inBrowser) {

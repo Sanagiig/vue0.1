@@ -135,6 +135,8 @@ function createWatcher(
   return vm.$watch(expOrFn, handler, options);
 }
 
+// 为 $data && $props 注册代理 映射至 _data && __props
+// $set $delete $watch
 export function stateMixin(Vue: ComponentCtor) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up

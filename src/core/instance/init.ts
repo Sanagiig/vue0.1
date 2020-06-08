@@ -7,6 +7,7 @@ import { initInjections, initProvide } from './inject';
 import { initState } from './state';
 
 let uid = 0;
+// _uid _isVue _renderProxy = vm ; _self = vm
 export function initMixin(Vue: ComponentCtor) {
   Vue.prototype._init = function (
     this: Component, options?: ComponentOptions | InternalComponentOptions) {
@@ -95,13 +96,14 @@ export function initInternalComponent(
   }
 }
 
-// 解析构造函数中opts
+// 解析父Ctor.opt 如果opt对象被覆盖, 
+// 则更新当前 Ctor.options 并  mergeOptions(superOptions, Ctor.extendOptions);
 export function resolveConstructorOptions(
   Ctor: ComponentCtor): ComponentOptions {
   let options = Ctor.options;
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super);
-    // 父原始opts
+    // sub 中父原始opts
     const cachedSuperOptions = Ctor.superOptions;
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
@@ -125,6 +127,7 @@ export function resolveConstructorOptions(
   return options;
 }
 
+// 对比当前opt 与 sealedOpt , 将修改值 作为 modeified 返回
 function resolveModifiedOptions(Ctor: ComponentCtor): any {
   let modeified: any;
   const latest = Ctor.options;

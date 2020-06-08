@@ -17,6 +17,7 @@ function remove (event:any, fn:Function) {
   target.$off(event, fn);
 }
 
+// on off emit
 export function eventsMixin(Vue: ComponentCtor) {
   const hookRE = /^hook:/;
   Vue.prototype.$on = function (
@@ -80,6 +81,7 @@ export function eventsMixin(Vue: ComponentCtor) {
     return vm;
   }
 
+  // 触发 this._events[event]
   Vue.prototype.$emit = function (this:Component,event: string) {
     const vm = this;
     if (process.env.NODE_ENV !== 'production') {
@@ -113,6 +115,7 @@ export function initEvents(vm: Component) {
   vm._hasHookEvent = false;
 
   // init parent attached events
+  // 初始化父组件传入的 listeners
   const listeners = vm.$options._parentListeners;
   if (listeners) {
     // 为子组件新增父组件的监听方法

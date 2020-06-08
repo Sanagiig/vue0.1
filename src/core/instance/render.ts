@@ -21,10 +21,13 @@ export function renderMixin(Vue: ComponentCtor) {
     return nextTick(fn, this);
   }
 
+  // 处理具名插槽、调用option.render
+  // 确定render 返回的vnode.parent = option._parentVnode
   Vue.prototype._render = function (tihs:Comment): VNodeInstance{
     const vm = this;
     const { render, _parentVnode } = vm.$options;
 
+    // 处理具名插槽
     if (_parentVnode) {
       vm.$scopedSlots = normalizeScopedSlots(
         _parentVnode.data.scopedSlots,
@@ -77,6 +80,8 @@ export function renderMixin(Vue: ComponentCtor) {
   }
 }
 
+// VNode, _staticTrees, vm.$vnode = options._parentVnode
+// 
 export function initRender(vm: Component | any) {
   // the root of the child tree
   vm.VNode = null;

@@ -26,6 +26,7 @@ const normalizeEvent = cached((name: string): {
   }
 });
 
+// 创建函数连接
 export function createFnInvoker(
   fns: Function | Array<Function>,
   vm?: Component | null

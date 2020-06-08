@@ -15,6 +15,7 @@ const idToTemplate = cached((id:string | Element) => {
 }) 
 
 const mount = Vue.prototype.$mount;
+// 处理template => render && 挂载
 Vue.prototype.$mount = function (
   this:Component,
   el?: string | Element,

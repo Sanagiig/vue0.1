@@ -57,6 +57,9 @@ export function callHook(vm: Component | any, hook: string) {
   popTarget();
 }
 
+// 判断render
+// beforeMount hook
+// vm._watcher 当状态发生改变时 vm._update(vm._render(), hydrating);
 export function mountComponent(
   vm: Component,
   el: Element | null,
@@ -140,7 +143,11 @@ export function setActiveInstance(vm: Component):any {
   }
 }
 
+// _update $forceUpdate
+// 
 export function lifecycleMixin(Vue: ComponentCtor) {
+  // __patch__ 时 更改 activeInstance 
+  // 修改 _vnode ，  elm.__vue__ = vm
   Vue.prototype._update = function (
     this: Component,
     vnode: VNodeInstance,
@@ -176,7 +183,7 @@ export function lifecycleMixin(Vue: ComponentCtor) {
     // updated hook is called by the scheduler to ensure that children are
     // updated in a parent's updated hook.
   }
-
+  // 调用 vm._watcher.update => vm._update => vm._update(vm._render(), hydrating)
   Vue.prototype.$forceUpdate = function (this:Component) {
     const vm = this;
     if (vm._watcher) {
@@ -184,6 +191,11 @@ export function lifecycleMixin(Vue: ComponentCtor) {
     }
   }
 
+  // beforeDestroy hook
+  // 从$parent.$children 中删除
+  // vm._watcher.teardown() && vm._watchers[i].teardown();
+  // vm.__patch__(vm._vnode, null);
+  // callHook(vm, 'destroyed'); vm.$off();
   Vue.prototype.$destroy = function (this:Component) {
     const vm = this;
     if (vm._isBeingDestroyed) {

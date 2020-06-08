@@ -1,6 +1,9 @@
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
  */
+
+//  删除 children.data.attrs.slot
+//  处理默认、具名插槽将插槽组成对象返回
 export function resolveSlots (
   children: VNodeInstance[],
   context: Component
@@ -18,6 +21,9 @@ export function resolveSlots (
     }
     // named slots should only be respected if the vnode was rendered in the
     // same context.
+    // 当前组件拥有具名插槽并且父组件也应用了该插槽
+    // 将该节点加入其 $slots[name]
+    // 默认插槽则加入slots.default
     if ((child.context === context || child.fnContext === context) &&
       data && data.slot != null
     ) {
