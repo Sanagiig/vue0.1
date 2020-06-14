@@ -9,7 +9,7 @@ import {
   getAndRemoveAttr,
 } from '@utils/index';
 
-// 为tag 预先增加 [checkbox,radio] 的 v-if astElement
+// 为不存在v-model 的 input tag 预先增加 [checkbox,radio] 的 v-if astElement
 function preTransformNode (el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {
     const map = el.attrsMap;
@@ -21,15 +21,19 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
     if (map[':type'] || map['v-bind:type']) {
       typeBinding = getBindingAttr(el, 'type');
     }
+
+    // 如果无type属性，并且绑定了 $attrs 则 type绑定值与 $attrs.type 相关联
     if (!map.type && !typeBinding && map['v-bind']) {
       typeBinding = `(${map['v-bind']}).type`;
     }
 
+    // 处理拥有bindingType 的 input
     if (typeBinding) {
       const ifCondition = getAndRemoveAttr(el, 'v-if', true);
       const ifConditionExtra = ifCondition ? `&&(${ifCondition})` : ``;
       const hasElse = getAndRemoveAttr(el, 'v-else', true) != null;
       const elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true);
+      
       // 1. checkbox
       const branch0 = cloneASTElement(el);
       addRawAttr(branch0, 'type', 'checkbox');

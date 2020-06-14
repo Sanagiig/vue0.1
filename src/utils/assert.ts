@@ -144,6 +144,7 @@ export function isTextTag (el:any): boolean {
   return el.tag === 'script' || el.tag === 'style'
 }
 
+// 非文本tag && type !== text/javascript
 export function isForbiddenTag (el:any): boolean {
   return (
     el.tag === 'style' ||

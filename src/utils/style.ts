@@ -7,6 +7,7 @@ export const parseStyleText = cached(function (cssText:any) {
   const res:any = {}
   const listDelimiter = /;(?![^(]*\))/g
   const propertyDelimiter = /:(.+)/
+  // 根据 ; 进行分割，忽略 [^(]*\)
   cssText.split(listDelimiter).forEach(function (item:any) {
     if (item) {
       const tmp = item.split(propertyDelimiter)

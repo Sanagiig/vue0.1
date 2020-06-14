@@ -75,7 +75,7 @@ export function parseFilters (exp: string): string {
           p = exp.charAt(j)
           if (p !== ' ') break
         }
-        // “/” 前无字符 或 前面非空白字符不匹配 re 则进入正则判断
+        // “/” 前无字符 或 前面非空白字符不匹配 re(表达式判断) 则进入正则判断
         if (!p || !validDivisionCharRE.test(p)) {
           inRegex = true
         }
@@ -89,11 +89,13 @@ export function parseFilters (exp: string): string {
     pushFilter()
   }
 
+  // 将 | exp 作为过滤器添加
   function pushFilter () {
     (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim())
     lastFilterIndex = i + 1
   }
 
+  // 存在过滤器则将其转为 code
   if (filters) {
     for (i = 0; i < filters.length; i++) {
       expression = wrapFilter(expression, filters[i])
@@ -103,6 +105,7 @@ export function parseFilters (exp: string): string {
   return expression
 }
 
+// 将带参数或无参过滤器 转成 _f(name)(arg1,arg2)
 function wrapFilter (exp: string, filter: string): string {
   const i = filter.indexOf('(')
   // 判断 filter 有无参数

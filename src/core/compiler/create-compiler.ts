@@ -2,8 +2,13 @@ import {extend} from '@utils/index';
 import { detectErrors } from './error-detector';
 import { createCompileToFunctionFn } from './to-function'
 
-export function createCompilerCreator (baseCompile: Function): Function {
-  return function createCompiler (baseOptions: CompilerOptions) {
+// 创建编译器 fac ， 存储 baseCompile
+export function createCompilerCreator(baseCompile: Function): Function {
+  // 创建编译器，存储baseOptions
+  return function createCompiler(baseOptions: CompilerOptions) {
+    // 编译器，确定提示工具，合成 modules && directives
+    // 通过外部options 生成编译所需选项
+    // 编译结果由baseCompile 决定，并且会加上提示 && 错误 信息
     function compile(
       template:string,
       options?:CompilerOptions
@@ -40,11 +45,6 @@ export function createCompilerCreator (baseCompile: Function): Function {
             (baseOptions.modules || []).concat(options.modules)
         }
         // merge custom directives
-        if(options.modules){
-          finalOptions.modules =
-            (baseOptions.modules || []).concat(options.modules)
-        }
-         // merge custom directives
         if (options.directives) {
           finalOptions.directives = extend(
             Object.create(baseOptions.directives || null),

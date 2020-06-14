@@ -57,6 +57,7 @@ export function parseHTML(html: any, options: any) {
   while (html) {
     last = html;
     // Make sure we're not in a plaintext content element like script/style
+    // 解析首个tag 或 非文本elm
     if (!lastTag || !isPlainTextElement(lastTag)) {
       // 文本结束的位置 "<" 开始的位置
       let textEnd = html.indexOf('<');
@@ -118,6 +119,7 @@ export function parseHTML(html: any, options: any) {
         rest, 
         // 下一个无意义的 “<” 的位置
         next
+      // 处理< 前的文本,并将多余 < 作为文本
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
         // 解析纯文本
@@ -156,6 +158,10 @@ export function parseHTML(html: any, options: any) {
     index += n
     html = html.substring(n)
   }
+  // 处理 start_tag 直到 > || />
+  // 如果匹配到，返回 {tagName,attrs:[],start}
+  // 该方法会将所有属性以正则匹配结果集加上 start && end 返回
+  // 对一元标签加上 unarySlash 标记
   function parseStartTag():any { 
     const start = html.match(startTagOpen)
     if (start) {
@@ -180,15 +186,23 @@ export function parseHTML(html: any, options: any) {
       }
     }
   }
+
+  // 处理段落标签 && canBeLeftOpenTag
+  // 对属性中的转义字符进行处理
+  // 将 tag 的信息加入至 stack 中
+  // option.start
+  // 更新 lastTag
   function handleStartTag(match: any) { 
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
     // 期望 html ??
     if (expectHTML) {
+      // p 元素与 段落标签相邻则立即结束 p
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
+      // 对 canBeLeftOpenTag 进行特殊处理，立即结束上一个 tag
       if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
         parseEndTag(tagName)
       }
@@ -205,6 +219,7 @@ export function parseHTML(html: any, options: any) {
       const shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
         ? options.shouldDecodeNewlinesForHref
         : options.shouldDecodeNewlines
+      // 对value 回车等转义字符进行转义，变成相应字符
       attrs[i] = {
         name: args[1],
         value: decodeAttr(value, shouldDecodeNewlines)
@@ -244,10 +259,12 @@ export function parseHTML(html: any, options: any) {
       // If no tag name is provided, clean shop
       pos = 0
     }
+    
 
     if (pos >= 0) {
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
+        // 将匹配到的 pos 与栈做对比，如果有没关闭的标签则告警
         if (process.env.NODE_ENV !== 'production' &&
           (i > pos || !tagName) &&
           options.warn
@@ -257,6 +274,7 @@ export function parseHTML(html: any, options: any) {
             { start: stack[i].start }
           )
         }
+        // 关闭标签(忽略是否匹配)
         if (options.end) {
           options.end(stack[i].tag, start, end)
         }
@@ -265,6 +283,8 @@ export function parseHTML(html: any, options: any) {
       // Remove the open elements from the stack
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
+
+      // 处理 </(br | p)>
     } else if (lowerCasedTagName === 'br') {
       if (options.start) {
         options.start(tagName, [], true, start, end)

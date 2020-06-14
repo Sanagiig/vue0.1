@@ -38,11 +38,13 @@ function rangeSetItem (
 }
 
 // add a raw attr (use this in preTransforms)
+// 为AST节点的 attrsList && attrsMap 添加属性
 export function addRawAttr (el: ASTElement, name: string, value: any, range?: Range) {
   el.attrsMap[name] = value
   el.attrsList.push(rangeSetItem({ name, value }, range))
 }
 
+// 为 AST.ATTRS 添加属性
 export function addAttr (el: ASTElement, name: string, value: any, range?: Range) {
   (el.attrs || (el.attrs = [])).push(rangeSetItem({ name, value }, range))
   el.plain = false
@@ -78,6 +80,7 @@ export function addHandler (
   modifiers = modifiers || emptyObject
   // warn prevent and passive modifier
   /* istanbul ignore if */
+  // 不允许 prevent && passive 同时修饰
   if (
     process.env.NODE_ENV !== 'production' && warn &&
     modifiers.prevent && modifiers.passive
@@ -92,6 +95,8 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
+  // click.right => contextmenu
+  // click.middle => mouseup
   if (name === 'click') {
     if (modifiers.right) {
       name = 'contextmenu'
@@ -117,6 +122,8 @@ export function addHandler (
   }
 
   let events
+  // .native => el.nativeEvents
+  // .normal => el.events
   if (modifiers.native) {
     delete modifiers.native
     events = el.nativeEvents || (el.nativeEvents = {})
@@ -124,6 +131,7 @@ export function addHandler (
     events = el.events || (el.events = {})
   }
 
+  // handler + range + modifiers
   const newHandler: any = rangeSetItem({ value: value.trim() }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
@@ -146,6 +154,7 @@ export function addHandler (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
+// 获取 attrList[x] 然后从list删除
 export function getAndRemoveAttr (
   el: ASTElement,
   name: string,
@@ -167,6 +176,7 @@ export function getAndRemoveAttr (
   return val
 }
 
+// 获取 v-bind:name ， 并对val 进行过滤器解析
 export function getBindingAttr (
   el: ASTElement,
   name: string,

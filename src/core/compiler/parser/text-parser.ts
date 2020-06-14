@@ -18,6 +18,8 @@ type TextParseResult = {
   tokens: Array<string | { '@binding': string }>
 }
 
+// 解析字符串中的exp && flters
+// 如果是不需要解析的文本则返回空
 export function parseText(
   text: string,
   delimiters?: [string, string]
@@ -33,6 +35,7 @@ export function parseText(
   while ((match = tagRE.exec(text))) {
     index = match.index
     // push text token
+    // {{}} 前
     if (index > lastIndex) {
       rawTokens.push(tokenValue = text.slice(lastIndex, index))
       tokens.push(JSON.stringify(tokenValue))
@@ -48,6 +51,7 @@ export function parseText(
     tokens.push(JSON.stringify(tokenValue))
   }
   return {
+    // 字符串拼接 '+'
     expression: tokens.join('+'),
     tokens: rawTokens
   }

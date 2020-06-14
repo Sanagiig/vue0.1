@@ -103,6 +103,7 @@ export function toNumber (val: string): number | string {
 /**
  * Convert a value to a string that is actually rendered.
  */
+// 将对象转为字符
 export function toString (val: any): string {
   return val == null
     ? ''

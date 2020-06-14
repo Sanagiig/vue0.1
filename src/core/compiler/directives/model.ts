@@ -85,6 +85,7 @@ export function parseModel (val: string): ModelParseResult {
     /* istanbul ignore if */
     if (isStringStart(chr)) {
       parseString(chr)
+      // [
     } else if (chr === 0x5B) {
       parseBracket(chr)
     }
@@ -111,6 +112,7 @@ export function genAssignmentCode (
   }
 }
 
+// 下一个字符
 function next (): number {
   return str.charCodeAt(++index)
 }
@@ -119,11 +121,13 @@ function eof (): boolean {
   return index >= len
 }
 
+// 引号
 function isStringStart (chr: number): boolean {
   // " || '
   return chr === 0x22 || chr === 0x27
 }
 
+// 跳过 [] ，expressionPos = [ && expressionEndPos = ]
 function parseBracket (chr: number): void {
   let inBracket = 1
   expressionPos = index
@@ -144,6 +148,7 @@ function parseBracket (chr: number): void {
   }
 }
 
+// 跳过 "" || ''
 function parseString (chr: number): void {
   const stringQuote = chr
   while (!eof()) {

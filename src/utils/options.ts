@@ -191,6 +191,7 @@ export function mergeOptions(
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
  */
+// 获取type 对应的assets, id 对应的id || camelize || capitalize key
 export function resolveAsset (
   options: any,
   type: string,
@@ -201,6 +202,7 @@ export function resolveAsset (
   if (typeof id !== 'string') {
     return
   }
+  // 获取options 对应的处理对象
   const assets = options[type]
   // check local registration variations first
   if (hasOwn(assets, id)) return assets[id]

@@ -66,20 +66,18 @@ export function defineComputed(
   const shouldCache = !isServerRendering();
   // 如果计算属性 fn 拥有 get 或 userDef.get , 
   // 则vm[key] 的get 与 watch.evaluate 相关联并且当前watcher 会 调用depend 收集依赖
-  if (typeof userDef === 'function') {
-    sharedPropertyDefinition.get = userDef.get
+   if (typeof userDef === 'function') {
+    sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
-      : createGetterInvoker(userDef);
-    sharedPropertyDefinition.set = noop;
-
+      : createGetterInvoker(userDef)
+    sharedPropertyDefinition.set = noop
   } else {
-    sharedPropertyDefinition.get = userDef.cachhe !== false
-      ? shouldCache && userDef.cached !== false
+    sharedPropertyDefinition.get = userDef.get
+      ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
         : createGetterInvoker(userDef.get)
-      : noop;
-    
-    sharedPropertyDefinition.set = userDef.set || noop;
+      : noop
+    sharedPropertyDefinition.set = userDef.set || noop
   }
 
   if (process.env.NODE_ENV !== 'production' &&
@@ -94,7 +92,8 @@ export function defineComputed(
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
 
-// mark
+// 创建一个缓存的 watch.get 到 vm , 如果依赖没有触发更新则取缓存值，
+// 并且如果dep.target 存在会再次收集依赖
 function createComputedGetter(key: any): () => any {
   return function computedGetter(this:Component) {
     const watcher:WatcherInstance = this._computedWatchers && this._computedWatchers[key];
@@ -112,6 +111,7 @@ function createComputedGetter(key: any): () => any {
   }
 }
 
+// 直接调用computed fn
 function createGetterInvoker(fn: Function): () => any{
   return function computedGetter(this: Component) {
     return fn.call(this, this);
@@ -210,6 +210,10 @@ export function initState(vm: Component) {
   }
 }
 
+// _props , $options._propKeys 
+// 根据propData 确认 props 值，并 defineReactive
+// 同时会对 propData 传入的值进行合法校验，无传入则取 def
+// 对 _props 进行 proxy 到 vm
 function initProps(vm: Component, propsOptions: any) {
   const propsData = vm.$options.propsData || {};
   const props = vm._props = {};
@@ -262,6 +266,10 @@ function initProps(vm: Component, propsOptions: any) {
   toggleObserving(true);
 }
 
+// _data
+// 通过vm 获取 data() ，校验 key 是否与 props , methods 重复
+// proxy _data => vm
+// observe(data, true)  data.ob.vmCount ++
 function initData(vm: Component) {
   let data: any = vm.$options.data;
   data = vm._data = typeof data === 'function'
@@ -305,6 +313,8 @@ function initData(vm: Component) {
   observe(data, true /* asRootData */);
 }
 
+// _computedWatchers ，
+// 为option 里的 watch 对象保存至vm，
 function initComputed(vm: Component, computed: any) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null);
@@ -346,6 +356,8 @@ function initComputed(vm: Component, computed: any) {
   }
 }
 
+// 校验method name 合法性，不允许特殊字符命名，不允许与props || vm 属性名相同
+// 绑定methods 上下文为 vm
 function initMethods(vm: Component, methods: any) {
   const props = vm.$options.props;
   for (const key in methods) {
@@ -363,6 +375,7 @@ function initMethods(vm: Component, methods: any) {
           vm
         )
       }
+      // ！$ || ' '
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
