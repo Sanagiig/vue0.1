@@ -3,6 +3,8 @@ import { isObject, isDef, hasSymbol } from '@utils/index'
 /**
  * Runtime helper for rendering v-for lists.
  */
+// 对 val 类型进行判断，然后进行迭代将其每次迭代的值作为参数 => render 
+// ret._isVList = true
 export function renderList (
   val: any,
   render: (
@@ -14,11 +16,14 @@ export function renderList (
   let ret: Array<VNodeInstance> = [];
   let i, l, keys, key;
 
+  // arr || string 渲染
   if (Array.isArray(val) || typeof val === 'string') {
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i)
     }
+
+  // number
   } else if (typeof val === 'number') {
     ret = new Array(val)
     for (i = 0; i < val; i++) {

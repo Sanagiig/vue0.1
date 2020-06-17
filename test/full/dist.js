@@ -101,6 +101,7 @@
   /**
    * Convert a value to a string that is actually rendered.
    */
+  // 将对象转为字符
   function toString(val) {
       return val == null
           ? ''
@@ -236,6 +237,7 @@
   function isTextTag(el) {
       return el.tag === 'script' || el.tag === 'style';
   }
+  // 非文本tag && type !== text/javascript
   function isForbiddenTag(el) {
       return (el.tag === 'style' ||
           (el.tag === 'script' && (!el.attrsMap.type ||
@@ -245,6 +247,7 @@
    * Check if an attribute is a reserved attribute.
    */
   var isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
+  // svg && math
   function getTagNamespace(tag) {
       if (isSVG(tag)) {
           return 'svg';
@@ -256,6 +259,7 @@
       }
   }
   var unknownElementCache = Object.create(null);
+  // 判断是否属于未知标签
   function isUnknownElement(tag) {
       /* istanbul ignore if */
       if (!inBrowser) {
@@ -683,10 +687,12 @@
       return item;
   }
   // add a raw attr (use this in preTransforms)
+  // 为AST节点的 attrsList && attrsMap 添加属性
   function addRawAttr(el, name, value, range) {
       el.attrsMap[name] = value;
       el.attrsList.push(rangeSetItem({ name: name, value: value }, range));
   }
+  // 为 AST.ATTRS 添加属性
   function addAttr(el, name, value, range) {
       (el.attrs || (el.attrs = [])).push(rangeSetItem({ name: name, value: value }, range));
       el.plain = false;
@@ -703,6 +709,7 @@
       modifiers = modifiers || emptyObject;
       // warn prevent and passive modifier
       /* istanbul ignore if */
+      // 不允许 prevent && passive 同时修饰
       if ( warn &&
           modifiers.prevent && modifiers.passive) {
           warn('passive and prevent can\'t be used together. ' +
@@ -711,6 +718,8 @@
       // normalize click.right and click.middle since they don't actually fire
       // this is technically browser-specific, but at least for now browsers are
       // the only target envs that have right/middle clicks.
+      // click.right => contextmenu
+      // click.middle => mouseup
       if (name === 'click') {
           if (modifiers.right) {
               name = 'contextmenu';
@@ -735,6 +744,8 @@
           name = '&' + name; // mark the event as passive
       }
       var events;
+      // .native => el.nativeEvents
+      // .normal => el.events
       if (modifiers.native) {
           delete modifiers.native;
           events = el.nativeEvents || (el.nativeEvents = {});
@@ -742,6 +753,7 @@
       else {
           events = el.events || (el.events = {});
       }
+      // handler + range + modifiers
       var newHandler = rangeSetItem({ value: value.trim() }, range);
       if (modifiers !== emptyObject) {
           newHandler.modifiers = modifiers;
@@ -763,6 +775,7 @@
   // doesn't get processed by processAttrs.
   // By default it does NOT remove it from the map (attrsMap) because the map is
   // needed during codegen.
+  // 获取 attrList[x] 然后从list删除
   function getAndRemoveAttr(el, name, removeFromMap) {
       var val;
       if ((val = el.attrsMap[name]) != null) {
@@ -779,6 +792,7 @@
       }
       return val;
   }
+  // 获取 v-bind:name ， 并对val 进行过滤器解析
   function getBindingAttr(el, name, getStatic) {
       var dynamicValue = getAndRemoveAttr(el, ':' + name) ||
           getAndRemoveAttr(el, 'v-bind:' + name);
@@ -901,7 +915,7 @@
                       if (p !== ' ')
                           break;
                   }
-                  // “/” 前无字符 或 前面非空白字符不匹配 re 则进入正则判断
+                  // “/” 前无字符 或 前面非空白字符不匹配 re(表达式判断) 则进入正则判断
                   if (!p || !validDivisionCharRE.test(p)) {
                       inRegex = true;
                   }
@@ -914,10 +928,12 @@
       else if (lastFilterIndex !== 0) {
           pushFilter();
       }
+      // 将 | exp 作为过滤器添加
       function pushFilter() {
           (filters || (filters = [])).push(exp.slice(lastFilterIndex, i).trim());
           lastFilterIndex = i + 1;
       }
+      // 存在过滤器则将其转为 code
       if (filters) {
           for (i = 0; i < filters.length; i++) {
               expression = wrapFilter(expression, filters[i]);
@@ -925,6 +941,7 @@
       }
       return expression;
   }
+  // 将带参数或无参过滤器 转成 _f(name)(arg1,arg2)
   function wrapFilter(exp, filter) {
       var i = filter.indexOf('(');
       // 判断 filter 有无参数
@@ -1179,11 +1196,13 @@
    * This function is used because child instances need access
    * to assets defined in its ancestor chain.
    */
+  // 获取type 对应的assets, id 对应的id || camelize || capitalize key
   function resolveAsset(options, type, id, warnMissing) {
       /* istanbul ignore if */
       if (typeof id !== 'string') {
           return;
       }
+      // 获取options 对应的处理对象
       var assets = options[type];
       // check local registration variations first
       if (hasOwn(assets, id))
@@ -1206,7 +1225,7 @@
 
   // attributes that should be using props for binding
   var acceptValue = makeMap('input,textarea,option,select,progress');
-  // 带value属性的需要用.prop 隐藏在标签下
+  // 判断 tag && type && attr 是否属于需要加入到 elm.prop
   var mustUseProp = function (tag, type, attr) {
       return ((attr === 'value' && acceptValue(tag)) && type !== 'button' ||
           (attr === 'selected' && tag === 'option') ||
@@ -1228,6 +1247,7 @@
           passive: passive
       };
   });
+  // 创建函数连接
   function createFnInvoker(fns, vm) {
       function invoker() {
           var args = Array(arguments);
@@ -1282,6 +1302,8 @@
   /**
    * Runtime helper for resolving raw children VNodes into a slot object.
    */
+  //  删除 children.data.attrs.slot
+  //  处理默认、具名插槽将插槽组成对象返回
   function resolveSlots(children, context) {
       if (!children || !children.length) {
           return {};
@@ -1296,6 +1318,9 @@
           }
           // named slots should only be respected if the vnode was rendered in the
           // same context.
+          // 当前组件拥有具名插槽并且父组件也应用了该插槽
+          // 将该节点加入其 $slots[name]
+          // 默认插槽则加入slots.default
           if ((child.context === context || child.fnContext === context) &&
               data && data.slot != null) {
               var name_1 = data.slot;
@@ -1533,6 +1558,7 @@
       }
       return _createElement(context, tag, data, children, normalizationType);
   }
+  // 根据参数返回vnode 或 component
   function _createElement(context, tag, data, children, normalizationType) {
       // 不接受OB data对象
       if (isDef(data) && isDef(data.__ob__)) {
@@ -1620,7 +1646,8 @@
       }
   }
 
-  // mark
+  // 对比 slots 、 normalSlots 生成新 res ，
+  // 如果 key in normalSlots && key not in slots ,则取 _ => normalSlots[key]
   function normalizeScopedSlots(slots, normalSlots) {
       var res;
       if (!slots) {
@@ -1638,6 +1665,7 @@
           }
       }
       // expose normal slots on scopedSlots
+      // 将不存在与 slots （父未传入 scopedSlot）, 的key 转换为 proxy fn
       for (var key in normalSlots) {
           if (!(key in res)) {
               res[key] = proxyNormalSlot(normalSlots, key);
@@ -1646,6 +1674,7 @@
       res._normalized = true;
       return res;
   }
+  // 返回 func , func 将fn 的返回值进行处理 ， 返回合法的 [res] || res(null)
   function normalizeScopedSlot(fn) {
       return function (scope) {
           var res = fn(scope);
@@ -2246,8 +2275,9 @@
   /**
    * Runtime helper for resolving filters
    */
+  // 返回options对应的 filters[id]
   function resolveFilter(id) {
-      return function () { };
+      return resolveAsset(this.$options, 'filters', id, true) || identity;
   }
 
   function isKeyNotMatch(expect, actual) {
@@ -2526,6 +2556,7 @@
       var res = {};
       var listDelimiter = /;(?![^(]*\))/g;
       var propertyDelimiter = /:(.+)/;
+      // 根据 ; 进行分割，忽略 [^(]*\)
       cssText.split(listDelimiter).forEach(function (item) {
           if (item) {
               var tmp = item.split(propertyDelimiter);
@@ -3011,6 +3042,9 @@
       }
       popTarget();
   }
+  // 判断render
+  // beforeMount hook
+  // vm._watcher 当状态发生改变时 vm._update(vm._render(), hydrating);
   function mountComponent(vm, el, hydrating) {
       vm.$el = el;
       if (!vm.$options.render) {
@@ -3080,7 +3114,11 @@
           activeInstance = prevActiveInstance;
       };
   }
+  // _update $forceUpdate
+  // 
   function lifecycleMixin(Vue) {
+      // __patch__ 时 更改 activeInstance 
+      // 修改 _vnode ，  elm.__vue__ = vm
       Vue.prototype._update = function (vnode, hydrating) {
           var vm = this;
           var prevEl = vm.$el;
@@ -3113,12 +3151,18 @@
           // updated hook is called by the scheduler to ensure that children are
           // updated in a parent's updated hook.
       };
+      // 调用 vm._watcher.update => vm._update => vm._update(vm._render(), hydrating)
       Vue.prototype.$forceUpdate = function () {
           var vm = this;
           if (vm._watcher) {
               vm._watcher.update();
           }
       };
+      // beforeDestroy hook
+      // 从$parent.$children 中删除
+      // vm._watcher.teardown() && vm._watchers[i].teardown();
+      // vm.__patch__(vm._vnode, null);
+      // callHook(vm, 'destroyed'); vm.$off();
       Vue.prototype.$destroy = function () {
           var vm = this;
           if (vm._isBeingDestroyed) {
@@ -3192,6 +3236,7 @@
   function remove$1(event, fn) {
       target.$off(event, fn);
   }
+  // on off emit
   function eventsMixin(Vue) {
       var hookRE = /^hook:/;
       Vue.prototype.$on = function (event, fn) {
@@ -3246,6 +3291,7 @@
           }
           return vm;
       };
+      // 触发 this._events[event]
       Vue.prototype.$emit = function (event) {
           var vm = this;
           {
@@ -3275,6 +3321,7 @@
       vm._events = Object.create(null);
       vm._hasHookEvent = false;
       // init parent attached events
+      // 初始化父组件传入的 listeners
       var listeners = vm.$options._parentListeners;
       if (listeners) {
           // 为子组件新增父组件的监听方法
@@ -3302,9 +3349,12 @@
       Vue.prototype.$nextTick = function (fn) {
           return nextTick(fn, this);
       };
+      // 处理具名插槽、调用option.render
+      // 确定render 返回的vnode.parent = option._parentVnode
       Vue.prototype._render = function (tihs) {
           var vm = this;
           var _a = vm.$options, render = _a.render, _parentVnode = _a._parentVnode;
+          // 处理具名插槽
           if (_parentVnode) {
               vm.$scopedSlots = normalizeScopedSlots(_parentVnode.data.scopedSlots, vm.$slots);
           }
@@ -3351,6 +3401,8 @@
           return vnode;
       };
   }
+  // VNode, _staticTrees, vm.$vnode = options._parentVnode
+  // 
   function initRender(vm) {
       // the root of the child tree
       vm.VNode = null;
@@ -3481,14 +3533,14 @@
       // 如果计算属性 fn 拥有 get 或 userDef.get , 
       // 则vm[key] 的get 与 watch.evaluate 相关联并且当前watcher 会 调用depend 收集依赖
       if (typeof userDef === 'function') {
-          sharedPropertyDefinition.get = userDef.get
+          sharedPropertyDefinition.get = shouldCache
               ? createComputedGetter(key)
               : createGetterInvoker(userDef);
           sharedPropertyDefinition.set = noop;
       }
       else {
-          sharedPropertyDefinition.get = userDef.cachhe !== false
-              ? shouldCache && userDef.cached !== false
+          sharedPropertyDefinition.get = userDef.get
+              ? shouldCache && userDef.cache !== false
                   ? createComputedGetter(key)
                   : createGetterInvoker(userDef.get)
               : noop;
@@ -3502,7 +3554,8 @@
       }
       Object.defineProperty(target, key, sharedPropertyDefinition);
   }
-  // mark
+  // 创建一个缓存的 watch.get 到 vm , 如果依赖没有触发更新则取缓存值，
+  // 并且如果dep.target 存在会再次收集依赖
   function createComputedGetter(key) {
       return function computedGetter() {
           var watcher = this._computedWatchers && this._computedWatchers[key];
@@ -3518,6 +3571,7 @@
           }
       };
   }
+  // 直接调用computed fn
   function createGetterInvoker(fn) {
       return function computedGetter() {
           return fn.call(this, this);
@@ -3533,6 +3587,8 @@
       }
       return vm.$watch(expOrFn, handler, options);
   }
+  // 为 $data && $props 注册代理 映射至 _data && __props
+  // $set $delete $watch
   function stateMixin(Vue) {
       // flow somehow has problems with directly declared definition object
       // when using Object.defineProperty, so we have to procedurally build up
@@ -3594,6 +3650,10 @@
           initWatch(vm, opts.watch);
       }
   }
+  // _props , $options._propKeys 
+  // 根据propData 确认 props 值，并 defineReactive
+  // 同时会对 propData 传入的值进行合法校验，无传入则取 def
+  // 对 _props 进行 proxy 到 vm
   function initProps(vm, propsOptions) {
       var propsData = vm.$options.propsData || {};
       var props = vm._props = {};
@@ -3636,6 +3696,10 @@
       }
       toggleObserving(true);
   }
+  // _data
+  // 通过vm 获取 data() ，校验 key 是否与 props , methods 重复
+  // proxy _data => vm
+  // observe(data, true)  data.ob.vmCount ++
   function initData(vm) {
       var data = vm.$options.data;
       data = vm._data = typeof data === 'function'
@@ -3669,6 +3733,8 @@
       // observe data
       observe(data, true /* asRootData */);
   }
+  // _computedWatchers ，
+  // 为option 里的 watch 对象保存至vm，
   function initComputed(vm, computed) {
       // $flow-disable-line
       var watchers = vm._computedWatchers = Object.create(null);
@@ -3700,6 +3766,8 @@
           }
       }
   }
+  // 校验method name 合法性，不允许特殊字符命名，不允许与props || vm 属性名相同
+  // 绑定methods 上下文为 vm
   function initMethods(vm, methods) {
       var props = vm.$options.props;
       for (var key in methods) {
@@ -3711,6 +3779,7 @@
               if (props && hasOwn(props, key)) {
                   warn("Method \"" + key + "\" has already been defined as a prop.", vm);
               }
+              // ！$ || ' '
               if ((key in vm) && isReserved(key)) {
                   warn("Method \"" + key + "\" conflicts with an existing Vue instance method. " +
                       "Avoid defining component methods that start with _ or $.");
@@ -3734,6 +3803,7 @@
   }
 
   var uid$2 = 0;
+  // _uid _isVue _renderProxy = vm ; _self = vm
   function initMixin(Vue) {
       Vue.prototype._init = function (options) {
           var vm = this;
@@ -3805,12 +3875,13 @@
           opts.staticRenderFns = options.staticRenderFns;
       }
   }
-  // 解析构造函数中opts
+  // 解析父Ctor.opt 如果opt对象被覆盖, 
+  // 则更新当前 Ctor.options 并  mergeOptions(superOptions, Ctor.extendOptions);
   function resolveConstructorOptions(Ctor) {
       var options = Ctor.options;
       if (Ctor.super) {
           var superOptions = resolveConstructorOptions(Ctor.super);
-          // 父原始opts
+          // sub 中父原始opts
           var cachedSuperOptions = Ctor.superOptions;
           if (superOptions !== cachedSuperOptions) {
               // super option changed,
@@ -3833,6 +3904,7 @@
       }
       return options;
   }
+  // 对比当前opt 与 sealedOpt , 将修改值 作为 modeified 返回
   function resolveModifiedOptions(Ctor) {
       var modeified;
       var latest = Ctor.options;
@@ -4194,10 +4266,12 @@
               }
           }
       }
+      console.log('cbs', cbs);
       // 生成空 vnode
       function emptyNodeAt(elm) {
           return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm);
       }
+      // 生成 vnode.key 与 index 的map
       function createKeyToOldIdx(children, beginIdx, endIdx) {
           var i, key;
           var map = {};
@@ -4239,6 +4313,8 @@
               config.isUnknownElement(vnode.tag));
       }
       // 创建 pre 元素计数
+      // 将vnode 作为 elm 挂载到 parentElm 中， 
+      // vnodes.children 的vnodes push 到 insertedVnodeQueue 
       var creatingElmInVPre = 0;
       function createElm(vnode, insertedVnodeQueue, parentElm, refElm, nested, 
       // children
@@ -4285,7 +4361,7 @@
                   }
                   insert(parentElm, vnode.elm, refElm);
               }
-              // mark
+              // 处理完vnode 清空 v-pre标记
               if ( data && data.pre) {
                   creatingElmInVPre--;
               }
@@ -4301,6 +4377,7 @@
               insert(parentElm, vnode.elm, refElm);
           }
       }
+      // insert || append elm
       function insert(parent, elm, ref) {
           if (isDef(parent)) {
               if (isDef(ref)) {
@@ -4315,6 +4392,7 @@
       }
       // 检测重复 key
       // 新建elm
+      // 无children 则 当成文本 append
       function createChildren(vnode, children, insertedVnodeQueue) {
           if (Array.isArray(children)) {
               {
@@ -4454,13 +4532,14 @@
           // a reactivated keep-alive component doesn't insert itself
           insert(parentElm, vnode.elm, refElm);
       }
-      // 批量创建ele
+      // 根据 index 批量创建ele
       function addVnodes(parentElm, refElm, vnodes, startIdx, endIdx, insertedVnodeQueue) {
           for (; startIdx <= endIdx; ++startIdx) {
               createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm, false, vnodes, startIdx);
           }
       }
       // vnode and children => destroy hook , cbs.destroy
+      // 从上至下 销毁 vnode
       function invokeDestroyHook(vnode) {
           var i, j;
           var data = vnode.data;
@@ -4493,6 +4572,8 @@
       }
       // 修改RmCb listenrs , 并调用cbs.remove[i](vnode,rm)
       // 调用 remmove hook
+      // 如果vnode.data 则处理器监听者，按照modules 的数量进行清除
+      // 如果 组件vnode 则会递归调用
       function removeAndInvokeRemoveHook(vnode, rm) {
           if (isDef(rm) || isDef(vnode.data)) {
               var i_4;
@@ -4543,49 +4624,63 @@
               checkDuplicateKeys(newCh);
           }
           while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+              // 忽略未定义的 oldVnode
               if (isUndef(oldStartVnode)) {
                   oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left
               }
               else if (isUndef(oldEndVnode)) {
                   oldEndVnode = oldCh[--oldEndIdx];
+                  // 如果新旧start节点属于同一vnode 则 patch
               }
               else if (sameVnode(oldStartVnode, newStartVnode)) {
                   patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
                   oldStartVnode = oldCh[++oldStartIdx];
                   newStartVnode = newCh[++newStartIdx];
+                  // 如果新旧end节点属于同一vnode 则 patch
               }
               else if (sameVnode(oldEndVnode, newEndVnode)) {
                   patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
                   oldEndVnode = oldCh[--oldEndIdx];
                   newEndVnode = newCh[--newEndIdx];
+                  // 如果新end 旧start 节点属于同一vnode 则 patch 
+                  // 并将 oldStart.elm 插入 oldEndVnode.elm 后一个
               }
               else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
                   patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
                   canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
                   oldStartVnode = oldCh[++oldStartIdx];
                   newEndVnode = newCh[--newEndIdx];
+                  // 如果新start 旧end 节点属于同一vnode 则 patch 
+                  // 并将 oldEnd.elm 插入 oldStart.elm 前一个
               }
               else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
                   patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
                   canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm);
                   oldEndVnode = oldCh[--oldEndIdx];
                   newStartVnode = newCh[++newStartIdx];
+                  // 新旧 start end 4个节点均不匹配
               }
               else {
+                  // 根据 key:index 找 newVnode.key 在 old 的索引
+                  // 如果没有 key 则 在现有的 oldVnodes 中寻找 sameVnode 的索引
                   if (isUndef(oldKeyToIdx))
                       oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
                   idxInOld = isDef(newStartVnode.key)
                       ? oldKeyToIdx[newStartVnode.key]
                       : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
+                  // 没有在old 找到对应的 下标则新建elm , 将新elm 插入到 oldStart.elm 前
                   if (isUndef(idxInOld)) { // New element
                       createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
                   }
                   else {
                       vnodeToMove = oldCh[idxInOld];
+                      // 通过下标找到 old 对应的vnode 则 patch , 并将原有的old[idx] 置空
+                      // 将 vnodeToMove.elm 插入至 oldStart 前
                       if (sameVnode(vnodeToMove, newStartVnode)) {
                           patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
                           oldCh[idxInOld] = undefined;
                           canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
+                          // 找出的 index 与新节点不匹配则新建
                       }
                       else {
                           // same key but different element. treat as new element
@@ -4595,6 +4690,8 @@
                   newStartVnode = newCh[++newStartIdx];
               }
           }
+          // 新vnodes 已完全在 old 中找到
+          // 则将新增的vnodes 以 newEnd + 1 的elm 作为基准 插入到 parentElm 中
           if (oldStartIdx > oldEndIdx) {
               refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
               addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
@@ -4603,6 +4700,7 @@
               removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
           }
       }
+      // 在oldVnodes 中寻找与node 属于同样vnode 的节点，并返回索引 
       function findIdxInOld(node, oldCh, start, end) {
           for (var i_5 = start; i_5 < end; i_5++) {
               var c = oldCh[i_5];
@@ -4611,6 +4709,8 @@
           }
       }
       // 对比vnode 的差异，并对静态节点复用
+      // 如果是组件占位符则 hydrate
+      // 如果是静态组件则直接复用 old.componentInstance
       // 触发cbs prepatch 、 update 、 postpatch
       // updateChildren
       function patchVnode(oldVnode, vnode, insertedVnodeQueue, ownerArray, index, removeOnly) {
@@ -4622,6 +4722,7 @@
               vnode = ownerArray[index] = cloneVNode(vnode);
           }
           var elm = vnode.elm = oldVnode.elm;
+          // 处理组件占位符
           if (isTrue(oldVnode.isAsyncPlaceholder)) {
               if (isDef(vnode.asyncFactory.resolved)) {
                   hydrate(oldVnode.elm, vnode, insertedVnodeQueue);
@@ -4647,6 +4748,7 @@
           if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
               i(oldVnode, vnode);
           }
+          // cbs.update && update hook
           var oldCh = oldVnode.children;
           var ch = vnode.children;
           if (isDef(data) && isPatchable(vnode)) {
@@ -4655,35 +4757,43 @@
               if (isDef(i = data.hook) && isDef(i = i.update))
                   i(oldVnode, vnode);
           }
+          // 处理无文本vnode
           if (isUndef(vnode.text)) {
+              // 新旧子节点皆存在则更新子节点
               if (isDef(oldCh) && isDef(ch)) {
                   if (oldCh !== ch)
                       updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly);
+                  // 只有新子节点则新建vnodes && elms
               }
               else if (isDef(ch)) {
                   {
                       checkDuplicateKeys(ch);
                   }
+                  // 新增子节点
                   if (isDef(oldVnode.text))
                       nodeOps.setTextContent(elm, '');
                   addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
+                  // 无新子节点则清除子节点 && elm.children
               }
               else if (isDef(oldCh)) {
                   removeVnodes(elm, oldCh, 0, oldCh.length - 1);
+                  // 如果只有文本，无新节点 则清除文本子节点 
               }
               else if (isDef(oldVnode.text)) {
                   nodeOps.setTextContent(elm, '');
               }
+              // 更新文本节点
           }
           else if (oldVnode.text !== vnode.text) {
               nodeOps.setTextContent(elm, vnode.text);
           }
+          // cbs.postpatch
           if (isDef(data)) {
               if (isDef(i = data.hook) && isDef(i = i.postpatch))
                   i(oldVnode, vnode);
           }
       }
-      // 为初始化的插入的 queue 父data打标记 pendingInsert
+      // 为初始化的插入的 queue 父data打标记 pendingInsert= queue
       // 或触发 vnode insert hook
       function invokeInsertHook(vnode, queue, initial) {
           // delay insert hooks for component root nodes, invoke them after the
@@ -4714,7 +4824,7 @@
           var tag = vnode.tag, data = vnode.data, children = vnode.children;
           inVPre = inVPre || (data && data.pre);
           vnode.elm = elm;
-          // 确认是否属于占位节点
+          // 对comment占位节点不做过多处理
           if (isTrue(vnode.isComment) && isDef(vnode.asyncFactory)) {
               vnode.isAsyncPlaceholder = true;
               return true;
@@ -5589,6 +5699,7 @@
       var lastTag;
       while (html) {
           // Make sure we're not in a plaintext content element like script/style
+          // 解析首个tag 或 非文本elm
           if (!lastTag || !isPlainTextElement(lastTag)) {
               // 文本结束的位置 "<" 开始的位置
               var textEnd = html.indexOf('<');
@@ -5643,7 +5754,10 @@
               // 剩余未解析的 html
               rest = void 0, 
               // 下一个无意义的 “<” 的位置
-              next = void 0;
+              next 
+              // 处理< 前的文本,并将多余 < 作为文本
+              = void 0;
+              // 处理< 前的文本,并将多余 < 作为文本
               if (textEnd >= 0) {
                   rest = html.slice(textEnd);
                   // 解析纯文本
@@ -5677,6 +5791,10 @@
           index += n;
           html = html.substring(n);
       }
+      // 处理 start_tag 直到 > || />
+      // 如果匹配到，返回 {tagName,attrs:[],start}
+      // 该方法会将所有属性以正则匹配结果集加上 start && end 返回
+      // 对一元标签加上 unarySlash 标记
       function parseStartTag() {
           var start = html.match(startTagOpen);
           if (start) {
@@ -5701,14 +5819,21 @@
               }
           }
       }
+      // 处理段落标签 && canBeLeftOpenTag
+      // 对属性中的转义字符进行处理
+      // 将 tag 的信息加入至 stack 中
+      // option.start
+      // 更新 lastTag
       function handleStartTag(match) {
           var tagName = match.tagName;
           var unarySlash = match.unarySlash;
           // 期望 html ??
           if (expectHTML) {
+              // p 元素与 段落标签相邻则立即结束 p
               if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
                   parseEndTag(lastTag);
               }
+              // 对 canBeLeftOpenTag 进行特殊处理，立即结束上一个 tag
               if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
                   parseEndTag(tagName);
               }
@@ -5723,6 +5848,7 @@
               var shouldDecodeNewlines = tagName === 'a' && args[1] === 'href'
                   ? options.shouldDecodeNewlinesForHref
                   : options.shouldDecodeNewlines;
+              // 对value 回车等转义字符进行转义，变成相应字符
               attrs[i] = {
                   name: args[1],
                   value: decodeAttr(value, shouldDecodeNewlines)
@@ -5764,11 +5890,13 @@
           if (pos >= 0) {
               // Close all the open elements, up the stack
               for (var i = stack.length - 1; i >= pos; i--) {
+                  // 将匹配到的 pos 与栈做对比，如果有没关闭的标签则告警
                   if (
                       (i > pos || !tagName) &&
                       options.warn) {
                       options.warn("tag <" + stack[i].tag + "> has no matching end tag.", { start: stack[i].start });
                   }
+                  // 关闭标签(忽略是否匹配)
                   if (options.end) {
                       options.end(stack[i].tag, start, end);
                   }
@@ -5776,6 +5904,7 @@
               // Remove the open elements from the stack
               stack.length = pos;
               lastTag = pos && stack[pos - 1].tag;
+              // 处理 </(br | p)>
           }
           else if (lowerCasedTagName === 'br') {
               if (options.start) {
@@ -5800,6 +5929,8 @@
       var close = delimiters[1].replace(regexEscapeRE, '\\$&');
       return new RegExp(open + '((?:.|\\n)+?)' + close, 'g');
   });
+  // 解析字符串中的exp && flters
+  // 如果是不需要解析的文本则返回空
   function parseText(text, delimiters) {
       var tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE;
       if (!tagRE.test(text)) {
@@ -5812,6 +5943,7 @@
       while ((match = tagRE.exec(text))) {
           index = match.index;
           // push text token
+          // {{}} 前
           if (index > lastIndex) {
               rawTokens.push(tokenValue = text.slice(lastIndex, index));
               tokens.push(JSON.stringify(tokenValue));
@@ -5827,6 +5959,7 @@
           tokens.push(JSON.stringify(tokenValue));
       }
       return {
+          // 字符串拼接 '+'
           expression: tokens.join('+'),
           tokens: rawTokens
       };
@@ -6031,6 +6164,7 @@
           /* istanbul ignore if */
           if (isStringStart(chr)) {
               parseString(chr);
+              // [
           }
           else if (chr === 0x5B) {
               parseBracket(chr);
@@ -6053,16 +6187,19 @@
           return "$set(" + res.exp + ", " + res.key + ", " + assignment + ")";
       }
   }
+  // 下一个字符
   function next() {
       return str.charCodeAt(++index$1);
   }
   function eof() {
       return index$1 >= len;
   }
+  // 引号
   function isStringStart(chr) {
       // " || '
       return chr === 0x22 || chr === 0x27;
   }
+  // 跳过 [] ，expressionPos = [ && expressionEndPos = ]
   function parseBracket(chr) {
       var inBracket = 1;
       expressionPos = index$1;
@@ -6084,6 +6221,7 @@
           }
       }
   }
+  // 跳过 "" || ''
   function parseString(chr) {
       var stringQuote = chr;
       while (!eof()) {
@@ -6162,6 +6300,7 @@
           // tree management
           if (!stack.length && element !== root) {
               // allow root elements with v-if, v-else-if and v-else
+              // 根节点存在 if 的情况
               if (root.if && (element.elseif || element.else)) {
                   {
                       checkRootConstraints(element);
@@ -6178,12 +6317,15 @@
               }
           }
           if (currentParent && !element.forbidden) {
+              // elseif || else 合并至 ifConditions
               if (element.elseif || element.else) {
                   processIfConditions(element, currentParent);
+                  // 如果当前存在 slotScope , 则将当前ast节点加入至 currentParent。scopedSlots[name]
               }
               else if (element.slotScope) { // scoped slot
                   var name_1 = element.slotTarget || '"default"';
                   (currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name_1] = element;
+                  // ast 加入至 父节点children
               }
               else {
                   currentParent.children.push(element);
@@ -6198,10 +6340,12 @@
               inPre = false;
           }
           // apply post-transforms
+          // 默认无处理
           for (var i = 0; i < postTransforms.length; i++) {
               postTransforms[i](element, options);
           }
       }
+      // 告警 slot && template && v-for
       function checkRootConstraints(el) {
           if (el.tag === 'slot' || el.tag === 'template') {
               warnOnce("Cannot use <" + el.tag + "> as component root element because it may " +
@@ -6221,12 +6365,17 @@
           shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
           shouldKeepComment: options.comments,
           outputSourceRange: options.outputSourceRange,
+          // ns解析，属性解析成 pre, attrs，[ for, alias, iterator1,iterator2 ]
+          // [ ifConditions , elseif = exp, else = boolean] , once 
+          // 如果非一元标签则加入至 stack ，确定 currentParent
+          // 一元节点则调用 closeElement
           start: function (tag, attrs, unary, start) {
               // check namespace.
               // inherit parent ns if there is one
               var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
               // handle IE svg bug
               /* istanbul ignore if */
+              // 为ie 清除 attrName NS..
               if (isIE && ns === 'svg') {
                   attrs = guardIESVGBug(attrs);
               }
@@ -6234,6 +6383,7 @@
               if (ns) {
                   element.ns = ns;
               }
+              // rawAttrsMap 为 原始 attrsMap
               if ( options.outputSourceRange) {
                   element.start = start;
                   element.rawAttrsMap = element.attrsList.reduce(function (cumulated, attr) {
@@ -6249,6 +6399,7 @@
                       ("<" + tag + ">") + ', as they will not be parsed.', { start: element.start });
               }
               // apply pre-transforms
+              // 默认进行modules.model.preTransformNode
               for (var i = 0; i < preTransforms.length; i++) {
                   element = preTransforms[i](element, options) || element;
               }
@@ -6284,8 +6435,11 @@
                   closeElement(element);
               }
           },
+          // 空白节点清除，currentParent 修改
+          // closeElement
           end: function (tag, start, end) {
               var element = stack[stack.length - 1];
+              // 非绑定节点，清除 end.children[last] 的空白节点
               if (!inPre) {
                   // remove trailing whitespace node
                   var lastNode = element.children[element.children.length - 1];
@@ -6301,7 +6455,10 @@
               }
               closeElement(element);
           },
+          // 校验文本合法性，核对options 判断是否需要特殊处理空白字符
+          // 生成 textNode || expressNode
           chars: function (text, start, end) {
+              // 不允许纯 text
               if (!currentParent) {
                   {
                       if (text === template) {
@@ -6315,12 +6472,14 @@
               }
               // IE textarea placeholder bug
               /* istanbul ignore if */
+              // 兼容IE textarea 中的 text 转为 placeholder 
               if (isIE &&
                   currentParent.tag === 'textarea' &&
                   currentParent.attrsMap.placeholder === text) {
                   return;
               }
               var children = currentParent.children;
+              // inpre || text 存在字符
               if (inPre || text.trim()) {
                   text = isTextTag(currentParent) ? text : decodeHTMLCached(text);
               }
@@ -6330,6 +6489,7 @@
                   text = '';
               }
               else if (whitespaceOption) {
+                  // 去除换行符 || 转成单空格
                   if (whitespaceOption === 'condense') {
                       // in condense mode, remove the whitespace node if it contains
                       // line break, otherwise condense to a single space
@@ -6340,6 +6500,7 @@
                   }
               }
               else {
+                  // 空字符转空格
                   text = preserveWhitespace ? ' ' : '';
               }
               if (text) {
@@ -6349,6 +6510,7 @@
                   }
                   var res = void 0;
                   var child = void 0;
+                  // 处理 express
                   if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
                       child = {
                           type: 2,
@@ -6356,6 +6518,7 @@
                           tokens: res.tokens,
                           text: text
                       };
+                      // 非空字符 || 无兄弟节点 || 上个节点不是空格 则作为文本节点
                   }
                   else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
                       child = {
@@ -6372,6 +6535,8 @@
                   }
               }
           },
+          // comment 作为 特殊的 textNode
+          // 将该 ast 添加至 currentParent.children
           comment: function (text, start, end) {
               var child = {
                   type: 3,
@@ -6397,11 +6562,13 @@
       }
       return false;
   }
+  // v-pre
   function processPre(el) {
       if (getAndRemoveAttr(el, 'v-pre') != null) {
           el.pre = true;
       }
   }
+  // 将attrList => ast.attrs
   function processRawAttrs(el) {
       var list = el.attrsList;
       var len = list.length;
@@ -6424,21 +6591,28 @@
       }
   }
   function processElement(element, options) {
+      // key
       processKey(element);
       // determine whether this is a plain element after
       // removing structural attributes
+      // 判断是否属于无属性节点
       element.plain = (!element.key &&
           !element.scopedSlots &&
           !element.attrsList.length);
       processRef(element);
       processSlot(element);
       processComponent(element);
+      // 默认处理 static && dynamic => tyle && class
+      // staticStyle{key:val} && styleBinding
+      // staticClass && classBinding
       for (var i = 0; i < transforms.length; i++) {
           element = transforms[i](element, options) || element;
       }
       processAttrs(element);
       return element;
   }
+  // 取出绑定:key， 并对其在 template && transition in v-for 进行校验
+  // 修改 ast.key
   function processKey(el) {
       var exp = getBindingAttr(el, 'key');
       if (exp) {
@@ -6458,6 +6632,7 @@
           el.key = exp;
       }
   }
+  // 取出 :ref && 判断是否属于 v-for
   function processRef(el) {
       var ref = getBindingAttr(el, 'ref');
       if (ref) {
@@ -6465,9 +6640,12 @@
           el.refInFor = checkInFor(el);
       }
   }
-  // mark $slot ？？？
+  // 为所有子节点按slotTarget进行分组，
+  // 并将含有 $slot 的节点的分组加入scopedSlots 中
+  // 剔除含有 $slot 的子节点
   function processScopedSlots(el) {
       // 1. group children by slot target
+      // 按照插槽名称进行分组
       var groups = {};
       for (var i = 0; i < el.children.length; i++) {
           var child = el.children[i];
@@ -6493,12 +6671,16 @@
           }
       };
       // 2. for each slot group, check if the group contains $slot
+      // 当分组中有一个节点引用了 $slot 则将该分组的所有元素添加至一个新的
+      // template 的 children 中 并为该template 新增 slotScope = $slot
+      // 最后将已加入 template 的节点 从 el.children 中清除
       for (var name_2 in groups) {
           _loop_1(name_2);
       }
   }
   // 解析 <slot>  <xx slot-scope="">
   function processSlot(el) {
+      // 处理 slot 节点，并判断是否属于具名插槽
       if (el.tag === 'slot') {
           el.slotName = getBindingAttr(el, 'name');
           if ( el.key) {
@@ -6508,6 +6690,7 @@
           }
       }
       else {
+          // 确定template 中的 slotScope
           var slotScope = void 0;
           if (el.tag === 'template') {
               slotScope = getAndRemoveAttr(el, 'scope');
@@ -6519,6 +6702,7 @@
                       "denote scoped slots.", el.rawAttrsMap['scope'], true);
               }
               el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
+              // 确定slotScope ，如果其出现在 v-for 或 
           }
           else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
               /* istanbul ignore if */
@@ -6546,17 +6730,20 @@
                   processScopedSlots(el);
               }
           }
+          // 确定slotTarget，将其加入至ast.attrs.slot = slotTarget
           var slotTarget = getBindingAttr(el, 'slot');
           if (slotTarget) {
               el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget;
               // preserve slot as an attribute for native shadow DOM compat
               // only for non-scoped slots.
               if (el.tag !== 'template' && !el.slotScope && !nodeHas$Slot(el)) {
+                  // 添加attr 插槽属性
                   addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'));
               }
           }
       }
   }
+  // component=componentName , inlineTemplate
   function processComponent(el) {
       var binding;
       if ((binding = getBindingAttr(el, 'is'))) {
@@ -6579,6 +6766,7 @@
    * 2. 处理modifiers,将其取出，并还原原本属性名称
    * 3. 所有v-bind 的值将进行过滤器解析
    * 4. 根据修饰符对属性进行操作
+   * 5. sync 关联至事件
    */
   function processAttrs(el) {
       var list = el.attrsList;
@@ -6590,7 +6778,7 @@
           if (dirRE.test(name)) {
               // mark element as dynamic
               el.hasBindings = true;
-              // modifiers
+              // modifiers = {modifier:true}
               modifiers = parseModifiers(name.replace(dirRE, ''));
               // support .foo shorthand syntax for the .prop modifier
               // 去除修饰符，还原原本属性名称
@@ -6601,6 +6789,10 @@
               else if (modifiers) {
                   name = name.replace(modifierRE, '');
               }
+              // v-bind => isProp = false [def]
+              // 处理 v-bind:val filter
+              // 处理 sync 将其属性关联至事件
+              // 确定binding属性归属
               if (bindRE.test(name)) { // v-bind
                   name = name.replace(bindRE, '');
                   value = parseFilters$1(value);
@@ -6621,17 +6813,22 @@
                           name = camelize(name);
                       }
                       if (modifiers.sync) {
+                          // function($event){`value = $event`}
                           syncGen = genAssignmentCode(value, "$event");
+                          // 将 `update:name` 事件及处理方法 syncGen 关联至 ast.events
                           addHandler(el, "update:" + camelize(name), syncGen, null, false, warn$1, list[i]);
                           if (hyphenate(name) !== camelize(name)) {
                               addHandler(el, "update:" + hyphenate(name), syncGen, null, false, warn$1, list[i]);
                           }
                       }
                   }
+                  // 确定 attrsList[i] 归属
                   if (isProp || (!el.component && platformMustUseProp(el.tag, el.attrsMap.type, name))) {
+                      // ast.props
                       addProp(el, name, value, list[i]);
                   }
                   else {
+                      // ast.attrs
                       addAttr(el, name, value, list[i]);
                   }
               }
@@ -6640,6 +6837,9 @@
                   addHandler(el, name, value, modifiers, false, warn$1, list[i]);
               }
               else { // normal directives
+                  // 处理指令 v-x:val
+                  // 将 arg 作为 name
+                  // ast.directives = [{name,rawName,value,arg,modifiers,range}]
                   name = name.replace(dirRE, '');
                   // parse arg
                   var argMatch = name.match(argRE);
@@ -6648,6 +6848,7 @@
                       name = name.slice(0, -(arg.length + 1));
                   }
                   addDirective(el, name, rawName, value, arg, modifiers, list[i]);
+                  // v-model 合法校验
                   if ( name === 'model') {
                       checkForAliasModel(el, value);
                   }
@@ -6664,6 +6865,7 @@
                           'instead of <div id="{{ val }}">, use <div :id="val">.', list[i]);
                   }
               }
+              // 将非绑定属性加至 attrs
               addAttr(el, name, JSON.stringify(value), list[i]);
               // #6887 firefox doesn't update muted state if set via attribute
               // even immediately after element creation
@@ -6675,6 +6877,8 @@
           }
       }
   }
+  // 取出v-for 并生成 for 属性
+  // 将解析后的 for, alias,iterator1,iterator2 添加到 ast
   function processFor(el) {
       var exp;
       if ((exp = getAndRemoveAttr(el, 'v-for'))) {
@@ -6687,7 +6891,7 @@
           }
       }
   }
-  // mark
+  // for = list , alias = item , iterator1 = index , iterator2 = key
   function parseFor(exp) {
       var inMatch = exp.match(forAliasRE);
       if (!inMatch)
@@ -6711,6 +6915,8 @@
       }
       return res;
   }
+  // 将v-if 转成 exp && block 添加至 ast.ifConfitions
+  // ast.elseif , ast.else
   function processIf(el) {
       var exp = getAndRemoveAttr(el, 'v-if');
       if (exp) {
@@ -6730,6 +6936,7 @@
           }
       }
   }
+  // 查找上一个节点，与其ifConditions 合并
   function processIfConditions(el, parent) {
       var prev = findPrevElement(parent.children);
       if (prev && prev.if) {
@@ -6759,12 +6966,14 @@
           }
       }
   }
+  // ast.ifConditions
   function addIfCondition(el, condition) {
       if (!el.ifConditions) {
           el.ifConditions = [];
       }
       el.ifConditions.push(condition);
   }
+  // ast.once
   function processOnce(el) {
       var once = getAndRemoveAttr(el, 'v-once');
       if (once != null) {
@@ -6774,6 +6983,7 @@
   var ieNSBug = /^xmlns:NS\d+/;
   var ieNSPrefix = /^NS\d+:/;
   /* istanbul ignore next */
+  // 修改 ie中 ns=svg 属性
   function guardIESVGBug(attrs) {
       var res = [];
       for (var i = 0; i < attrs.length; i++) {
@@ -6785,6 +6995,7 @@
       }
       return res;
   }
+  // 将 attrList => {attr.name:attr}
   function makeAttrsMap(attrs) {
       var map = {};
       for (var i = 0, l = attrs.length; i < l; i++) {
@@ -6800,11 +7011,14 @@
       return el.children ? el.children.some(nodeHas$Slot) : false;
   }
   var $slotRE = /(^|[^\w_$])\$slot($|[^\w_$])/;
+  // 校验ast以及其子节点 动态值是否有关联至 $slot
   function nodeHas$Slot(node) {
       // caching
+      // 通过 ast.has$Slot 判断
       if (hasOwn(node, 'has$Slot')) {
           return node.has$Slot;
       }
+      // 如果其是元素节点，则遍历其attrsMap,校验其:name 属性值是否有绑定到$slot
       if (node.type === 1) { // element
           for (var key in node.attrsMap) {
               if (dirRE.test(key) && $slotRE.test(node.attrsMap[key])) {
@@ -6812,6 +7026,7 @@
               }
           }
           return (node.has$Slot = childrenHas$Slot(node));
+          // 如果是expression 节点则判断其表达式内是否存在 $slot 引用
       }
       else if (node.type === 2) { // expression
           // TODO more robust logic for checking $slot usage
@@ -6819,6 +7034,7 @@
       }
       return false;
   }
+  // v-model 不允许绑定 alias [正常人都不会这样做]
   function checkForAliasModel(el, value) {
       var _el = el;
       while (_el) {
@@ -6833,7 +7049,7 @@
       }
   }
 
-  // 为tag 预先增加 [checkbox,radio] 的 v-if astElement
+  // 为不存在v-model 的 input tag 预先增加 [checkbox,radio] 的 v-if astElement
   function preTransformNode(el, options) {
       if (el.tag === 'input') {
           var map = el.attrsMap;
@@ -6844,9 +7060,11 @@
           if (map[':type'] || map['v-bind:type']) {
               typeBinding = getBindingAttr(el, 'type');
           }
+          // 如果无type属性，并且绑定了 $attrs 则 type绑定值与 $attrs.type 相关联
           if (!map.type && !typeBinding && map['v-bind']) {
               typeBinding = "(" + map['v-bind'] + ").type";
           }
+          // 处理拥有bindingType 的 input
           if (typeBinding) {
               var ifCondition = getAndRemoveAttr(el, 'v-if', true);
               var ifConditionExtra = ifCondition ? "&&(" + ifCondition + ")" : "";
@@ -7723,10 +7941,15 @@
   }
   function createCompileToFunctionFn(compile) {
       var cache = Object.create(null);
+      // 处理编译 tip ,err 
+      // 生成 fn 并处理其间的 err
+      // 缓存 template 对应的 renderFn
       return function compileToFunctions(template, options, vm) {
+          // 删除 options.warn
           options = extend({}, options);
           var warn$1 = options.warn || warn;
           delete options.warn;
+          // 检测是否可以使用 eval
           /* istanbul ignore if */
           {
               // detect possible CSP restriction
@@ -7743,6 +7966,7 @@
                   }
               }
           }
+          // 缓存 template 编译后的 render
           // check cache
           var key = options.delimiters
               ? String(options.delimiters) + template
@@ -7753,6 +7977,7 @@
           // compile
           var compiled = compile(template, options);
           // check compilation errors/tips
+          // 打印编译时的 tip && error
           {
               if (compiled.errors && compiled.errors.length) {
                   if (options.outputSourceRange) {
@@ -7776,6 +8001,7 @@
               }
           }
           // turn code into functions
+          // 编译后code 转 fn
           var res = {};
           var fnGenErrors = [];
           res.render = createFunction(compiled.render, fnGenErrors);
@@ -7786,6 +8012,7 @@
           // this should only happen if there is a bug in the compiler itself.
           // mostly for codegen development use
           /* istanbul ignore if */
+          // 打印生成 fn 的 error
           {
               if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
                   warn$1("Failed to generate render function:\n\n" +
@@ -7799,8 +8026,13 @@
       };
   }
 
+  // 创建编译器 fac ， 存储 baseCompile
   function createCompilerCreator(baseCompile) {
+      // 创建编译器，存储baseOptions
       return function createCompiler(baseOptions) {
+          // 编译器，确定提示工具，合成 modules && directives
+          // 通过外部options 生成编译所需选项
+          // 编译结果由baseCompile 决定，并且会加上提示 && 错误 信息
           function compile(template, options) {
               var finalOptions = Object.create(baseOptions);
               var error = [];
@@ -7826,11 +8058,6 @@
                       };
                   }
                   // merge custom modules
-                  if (options.modules) {
-                      finalOptions.modules =
-                          (baseOptions.modules || []).concat(options.modules);
-                  }
-                  // merge custom directives
                   if (options.modules) {
                       finalOptions.modules =
                           (baseOptions.modules || []).concat(options.modules);
@@ -7870,6 +8097,7 @@
       if (options.optimize !== false) {
           optimize(ast, options);
       }
+      console.log('ast', ast);
       var code = generate(ast, options);
       return {
           ast: ast,
@@ -7885,6 +8113,7 @@
       return el && el.innerHTML;
   });
   var mount = Vue.prototype.$mount;
+  // 处理template => render && 挂载
   Vue.prototype.$mount = function (el, hydrating) {
       el = el && query(el);
       /* istanbul ignore if */

@@ -1,6 +1,11 @@
 /**
  * Runtime helper for rendering static trees.
  */
+// _staticTrees
+// 通过$options.staticRenderFns(编译时确定) 取缓存的静态节点函数
+// 将其渲染成dom 到 _staticTrees[index]
+// 并为elm加上 isStatic , key
+// v-for 的静态节点则不缓存，每次都通过 $options.staticRenderFns 渲染
 export function renderStatic (
   this:any,
   index: number,
@@ -27,6 +32,7 @@ export function renderStatic (
  * Runtime helper for v-once.
  * Effectively it means marking the node as static with a unique key.
  */
+// elm => isStatic key isOnce
 export function markOnce (
   tree: VNodeInstance | Array<VNodeInstance>,
   index: number,
@@ -36,6 +42,7 @@ export function markOnce (
   return tree
 }
 
+// elm 添加 isStatic
 function markStatic (
   tree: VNodeInstance | Array<VNodeInstance>,
   key: string,

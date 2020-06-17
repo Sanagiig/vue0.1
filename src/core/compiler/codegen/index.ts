@@ -90,10 +90,11 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     }
     return code
   }
-  return '';
 }
 
 // hoist static sub-trees out
+// 通过 _m 将静态节点渲染
+// state.staticRenderFns 的静态节点则通过 genElement 生成 code
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   // Some elements (templates) need to behave differently inside of a v-pre
@@ -113,6 +114,10 @@ function genStatic (el: ASTElement, state: CodegenState): string {
 }
 
 // v-once
+// 优先执行 v-if , el.staticInFor 只允许在 v-for :key 中
+// 如果在for中则取出 parent v-for :key 作为 onceElm key
+// 再通过 markOnce 生成 elm.key
+// 非 in v-for 则 当做静态节点生成 code
 function genOnce (el: ASTElement, state: CodegenState): string {
   el.onceProcessed = true
   if (el.if && !el.ifProcessed) {
@@ -120,6 +125,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   } else if (el.staticInFor) {
     let key = ''
     let parent = el.parent
+    // 获取 parent v-for 的 key
     while (parent) {
       if (parent.for) {
         key = <string>parent.key
@@ -140,6 +146,7 @@ function genOnce (el: ASTElement, state: CodegenState): string {
   }
 }
 
+// el.ifProcessed
 export function genIf (
   el: any,
   state: CodegenState,
@@ -150,6 +157,10 @@ export function genIf (
   return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
+// altGen altEmpty 默认为空
+// 生成的代码 => 通过 
+// condition.exp ? genOnce || genElement : genIfConditions
+// 生成多个三目运算符组成的函数 code
 function genIfConditions (
   conditions: ASTIfConditions,
   state: CodegenState,
@@ -172,6 +183,7 @@ function genIfConditions (
   }
 
   // v-if with v-once should generate code like (a)?_m(0):_m(1)
+  // 约等于 genOnce || genElement
   function genTernaryExp (el:any) {
     return altGen
       ? altGen(el, state)
@@ -181,6 +193,9 @@ function genIfConditions (
   }
 }
 
+// 判断 v-for 合法性
+// 将(alias,iterator1,iterator2) => `${genElement()}` 作为code 与
+// el.for 传入 renderList 生成迭代的 vnode 
 export function genFor (
   el: any,
   state: CodegenState,
@@ -192,6 +207,7 @@ export function genFor (
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
 
+  // 组件无key 告警
   if (process.env.NODE_ENV !== 'production' &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&

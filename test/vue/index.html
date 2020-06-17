@@ -12,19 +12,19 @@
   <button id="btn">click</button>
   <input id="input" type="text">
   <div id="app">
-    <div v-for=""></div>
+    <div v-for="item in list" :key="item"></div>
     <slot></slot>
-    <div>test</div>
     <slot name="xx" :list="list"></slot>
-    <slot name="xx" slot-scope="list"></slot>
+    <div name="xx" slot-scope="list"></div>
+    <div></div>
     <!-- <div slotScope="zz">
       {{zz}}
     </div> -->
   </div>
-  <script src="./dist.js"></script>
+  <script src="./vue.js"></script>
   <script>
     window.onload = function () {
-      var vm = new Vvue({
+      var vm = new Vue({
         el: '#app',
         data() {
           return {
@@ -39,13 +39,6 @@
           }
         },
       })
-
-      // document.getElementById('xx').addEventListener('click', function (e) {
-      //   vm.x1++;
-      // })
-      // var dom = document.getElementById('app');
-      // var tmp = dom.outerHTML;
-      // var ast = Vvue.compile(tmp)
       console.log('vm', vm)
       console.log(document.getElementById('unxx').tagName)
       document.getElementById('btn').addEventListener('click', function (e) {

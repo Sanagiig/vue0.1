@@ -128,13 +128,13 @@ export function parse (
       }
     }
 
-
     if (currentParent && !element.forbidden) {
       // elseif || else 合并至 ifConditions
       if (element.elseif || element.else) {
         processIfConditions(element, currentParent)
 
-        // 如果当前存在 slotScope , 则将当前ast节点加入至 currentParent。scopedSlots[name]
+        // 如果当前存在 slotScope , 
+        // 则将当前ast节点加入至 currentParent.scopedSlots[name]
       } else if (element.slotScope) { // scoped slot
         const name = element.slotTarget || '"default"'
         ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
@@ -836,6 +836,7 @@ function processIf (el:any) {
   }
 }
 
+// 查找上一个节点，与其ifConditions 合并
 function processIfConditions (el:any, parent:any) {
   const prev = findPrevElement(parent.children)
   if (prev && prev.if) {

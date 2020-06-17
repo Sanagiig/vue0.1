@@ -69,6 +69,7 @@ export default class VNode {
   }
 }
 
+// 创建空白vnode
 export const createEmptyVNode = (text: string = ''): VNodeInstance => {
   const node = new VNode();
   node.text = text;

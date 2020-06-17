@@ -16,6 +16,8 @@ const genStaticKeysCached = cached(genStaticKeys)
  *    create fresh nodes for them on each re-render;
  * 2. Completely skip them in the patching process.
  */
+// static staticRoot staticInFor
+// 确认 static 节点 && staticRoot 节点 && staticInFor 节点
 export function optimize (root: ASTElement | null, options: CompilerOptions) {
   if (!root) return
   isStaticKey = genStaticKeysCached(options.staticKeys || '')
@@ -26,6 +28,7 @@ export function optimize (root: ASTElement | null, options: CompilerOptions) {
   markStaticRoots(root, false)
 }
 
+// static 节点必须拥有的属性
 function genStaticKeys (keys: string): Function {
   return makeMap(
     'type,tag,attrsList,attrsMap,plain,parent,children,attrs,start,end,rawAttrsMap,has$Slot' +
@@ -33,12 +36,15 @@ function genStaticKeys (keys: string): Function {
   )
 }
 
+// 遍历 children && ifConditions 通过isStatic 确定子节点状态
+// 父节点 static 由子节点确定
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {
     // do not make component slot content static. this avoids
     // 1. components not able to mutate slot nodes
     // 2. static slot content fails for hot-reloading
+    // 不对未识别标签做处理
     if (
       !isPlatformReservedTag(node.tag) &&
       !node.component &&
@@ -47,6 +53,8 @@ function markStatic (node: ASTNode) {
     ) {
       return
     }
+
+    // 对所有子节点进行静态标识，父节点static与子节点false一致
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)
@@ -54,6 +62,8 @@ function markStatic (node: ASTNode) {
         node.static = false
       }
     }
+
+    // v-if 节点static与ifConditions.block节点false一致
     if (node.ifConditions) {
       for (let i = 1, l = node.ifConditions.length; i < l; i++) {
         const block = node.ifConditions[i].block
@@ -66,6 +76,9 @@ function markStatic (node: ASTNode) {
   }
 }
 
+// 遍历 children && ifConditions.block
+// 将static节点，并且其子节点不是唯一的文本节点作为 staticRoot
+// v-for 下 只有 static || once 会标记 staticInFor
 function markStaticRoots (node: ASTNode, isInFor: boolean) {
   if (node.type === 1) {
     if (node.static || node.once) {
@@ -97,6 +110,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
   }
 }
 
+// 判断是否属于静态节点
 function isStatic (node: ASTNode): boolean {
   if (node.type === 2) { // expression
     return false
@@ -104,16 +118,18 @@ function isStatic (node: ASTNode): boolean {
   if (node.type === 3) { // text
     return true
   }
+
   return !!(node.pre || (
     !node.hasBindings && // no dynamic bindings
     !node.if && !node.for && // not v-if or v-for or v-else
     !isBuiltInTag(node.tag) && // not a built-in
     isPlatformReservedTag(node.tag) && // not a component
-    !isDirectChildOfTemplateFor(node) &&
+    !isDirectChildOfTemplateFor(node) &&  // 父系节点有非template tag
     Object.keys(node).every(isStaticKey)
   ))
 }
 
+// 判断父节点是否非 template v-for,
 function isDirectChildOfTemplateFor (node: ASTElement): boolean {
   while (node.parent) {
     node = node.parent
