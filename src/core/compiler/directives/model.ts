@@ -1,6 +1,10 @@
 /**
  * Cross-platform code generation for component v-model
  */
+// ast.model = {value,expression,callback}
+// 生成 assignmentCode ， $$v 为组件外部 v-model 绑定的值
+// callback 参数对应的是 $$v 方法体对应的是 assignmentCode
+// 执行callback 等于通过 $$v 修改 绑定的 value
 export function genComponentModel (
   el: ASTElement,
   value: string,
@@ -10,6 +14,7 @@ export function genComponentModel (
 
   const baseValueExpression = '$$v'
   let valueExpression = baseValueExpression
+  // 返回 trim code
   if (trim) {
     valueExpression =
       `(typeof ${baseValueExpression} === 'string'` +
@@ -62,6 +67,7 @@ export function parseModel (val: string): ModelParseResult {
   val = val.trim()
   len = val.length
 
+  // 无 [ 或 ] 不存在末尾
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     index = val.lastIndexOf('.')
     if (index > -1) {

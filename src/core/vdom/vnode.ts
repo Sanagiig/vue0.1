@@ -69,7 +69,7 @@ export default class VNode {
   }
 }
 
-// 创建空白vnode
+// 创建空白vnode (comment)
 export const createEmptyVNode = (text: string = ''): VNodeInstance => {
   const node = new VNode();
   node.text = text;
@@ -77,6 +77,7 @@ export const createEmptyVNode = (text: string = ''): VNodeInstance => {
   return node;
 }
 
+// 创建文本节点
 export function createTextVNode (val: string | number):VNodeInstance {
   return new VNode(undefined, undefined, undefined, String(val))
 }

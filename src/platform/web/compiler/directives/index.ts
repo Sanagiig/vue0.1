@@ -1,5 +1,9 @@
+import model from './model'
+import text from './text'
+import html from './html'
+
 export default {
-  html:{},
-  model:{},
-  text:{},
-};
+  model,
+  text,
+  html
+}

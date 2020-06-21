@@ -95,6 +95,7 @@ function nativeBind (fn: Function, ctx: Object): Function {
  * Convert an input value to a number for persistence.
  * If the conversion fails, return original string.
  */
+// 将str 转为浮点数
 export function toNumber (val: string): number | string {
   const n = parseFloat(val)
   return isNaN(n) ? val : n
@@ -113,7 +114,7 @@ export function toString (val: any): string {
 }
 
 /**
- * Merge an Array of Objects into a single Object.
+ * Merge an Array of Objects into a singlae Object.
  */
 export function toObject (arr: Array<any>): Object {
   const res = {}
@@ -125,6 +126,6 @@ export function toObject (arr: Array<any>): Object {
   return res
 }
 
-export const bind = Function.prototype.bind
+export const bind = !!Function.prototype.bind
   ? nativeBind
   : polyfillBind

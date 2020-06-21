@@ -3,6 +3,10 @@ import { extend, warn, isObject } from '@utils/index'
 /**
  * Runtime helper for rendering <slot>
  */
+// 渲染内部或外部插槽
+// 通过 $scopedSlots[name] 获取父组件传入的具名插槽
+// 或 通过 this.$slots[name] 获取本组件的插槽 或 fallback
+// 如果 props.slot (parse 中将 slot => attrs.slot) 则返回创建的 template(nodes)
 export function renderSlot (
   this:any,
   name: string,
@@ -28,6 +32,8 @@ export function renderSlot (
     nodes = this.$slots[name] || fallback
   }
 
+  // 如果是 <slot slot="target"></slot> 节点，则通过 template 创建
+  // mark 传入 插槽的插槽 ？？
   const target = props && props.slot
   if (target) {
     return this.$createElement('template', { slot: target }, nodes)

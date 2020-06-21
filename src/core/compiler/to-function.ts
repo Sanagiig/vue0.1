@@ -6,6 +6,9 @@ type CompiledFunctionResult = {
   staticRenderFns: Array<Function>;
 };
 
+/**
+ * code => fn
+ */
 function createFunction (code:string, errors:any) {
   try {
     return new Function(code)

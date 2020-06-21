@@ -32,6 +32,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
   }
 }
 
+// 生成
 function genData (el: ASTElement): string {
   let data = ''
   if (el.staticStyle) {

@@ -12,22 +12,32 @@
   <button id="btn">click</button>
   <input id="input" type="text">
   <div id="app">
-    <div v-for="item in list" :key="item"></div>
-    <slot></slot>
-    <slot name="xx" :list="list"></slot>
-    <div name="xx" slot-scope="list"></div>
-    <div></div>
-    <!-- <div slotScope="zz">
-      {{zz}}
-    </div> -->
+    <slot slot="xx">
+      slot in slot
+    </slot>
+    {{sel}}
+    <button @click="x1+=1">click</button>
+    <button @click.self="click">click</button>
+    <button @click="click">click</button>
+    <!-- <button id="btn2">click2</button>
+    <select v-model="sel" name="xx" id="">
+      <option value="1">1111</option>
+      <option value="2">2222</option>
+      <option id="opt" :value="x1">3333</option>
+    </select> -->
   </div>
   <script src="./vue.js"></script>
   <script>
     window.onload = function () {
+      // document.getElementById('btn2').addEventListener('click', function (e) {
+      //   var val = document.getElementById('opt').val;
+      //   console.log('val', val);
+      // })
       var vm = new Vue({
         el: '#app',
         data() {
           return {
+            sel: '',
             list: [1, 2, 3],
             x1: 22
           }

@@ -534,6 +534,9 @@ function processScopedSlots (el:any) {
 }
 
 // 解析 <slot>  <xx slot-scope="">
+// slotName => <slot name="xx"></slot>
+// slotTarget => <xx slot="xx"></xx>
+// slotScope => <xx slot-scope="val"></xx>
 function processSlot(el: any) {
   // 处理 slot 节点，并判断是否属于具名插槽
   if (el.tag === 'slot') {
@@ -660,7 +663,7 @@ function processAttrs (el:any) {
         name = name.replace(modifierRE, '')
       }
 
-      // v-bind => isProp = false [def]
+      // v-bind: => isProp = false [def]
       // 处理 v-bind:val filter
       // 处理 sync 将其属性关联至事件
       // 确定binding属性归属

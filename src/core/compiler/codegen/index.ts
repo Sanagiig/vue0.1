@@ -23,6 +23,7 @@ export class CodegenState {
     this.warn = options.warn || baseWarn
     this.transforms = pluckModuleFunction(<any[]>options.modules, 'transformCode')
     this.dataGenFns = pluckModuleFunction(<any[]>options.modules, 'genData')
+    // 框架指令
     this.directives = <{ [key: string]: DirectiveFunction }>extend(extend({}, baseDirectives), <any>options.directives)
     const isReservedTag = options.isReservedTag || no
     this.maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
@@ -230,6 +231,10 @@ export function genFor (
     '})'
 }
 
+// data => { 
+// directives, key, ref, refInFor, pre, tag, staticStyle, style,
+// domProps,attrs,
+// staticClass,class,on,nativeOn,slot,scopedSlots,model,inlineTemplate }
 export function genData (el: ASTElement, state: CodegenState): string {
   let data = '{'
 
@@ -258,14 +263,17 @@ export function genData (el: ASTElement, state: CodegenState): string {
     data += `tag:"${el.tag}",`
   }
   // module data generation functions
+  // class && style
   for (let i = 0; i < state.dataGenFns.length; i++) {
     data += state.dataGenFns[i](el)
   }
   // attributes
+  // attrs 转为标签属性
   if (el.attrs) {
     data += `attrs:{${genProps(el.attrs)}},`
   }
   // DOM props
+  // props 转为 domProps
   if (el.props) {
     data += `domProps:{${genProps(el.props)}},`
   }
@@ -278,10 +286,12 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // slot target
   // only for non-scoped slots
+  // 无scope 的slot 直接加入至 slot
   if (el.slotTarget && !el.slotScope) {
     data += `slot:${el.slotTarget},`
   }
   // scoped slots
+  // scopedSlots 对应 {key,fn} 在通过 resolveScopedSlots => {key:fn}
   if (el.scopedSlots) {
     data += `${genScopedSlots(el.scopedSlots, state)},`
   }
@@ -302,6 +312,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
       data += `${inlineTemplate},`
     }
   }
+  // 去除多余 ","
   data = data.replace(/,$/, '') + '}'
   // v-bind data wrap
   if (el.wrapData) {
@@ -314,6 +325,9 @@ export function genData (el: ASTElement, state: CodegenState): string {
   return data
 }
 
+// 生成 directives:[] code
+// 如果指令需要运行时，则生成code
+// [{name,rawName,value,expression,arg,modifiers}]
 function genDirectives (el: ASTElement, state: CodegenState): string | void {
   const dirs = el.directives
   if (!dirs) return
@@ -323,6 +337,10 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
+
+    // 默认 v-on => el.wrapData(bindObjectListeners) 
+    // v-bind => el.wrapListeners(bindObjectProps)
+    // v-model[v - html v - text 修改ast.props{ textContent, innerHTML }]
     const gen: DirectiveFunction = state.directives[dir.name]
     console.log("state.directives",state.directives)
     if (typeof gen === 'function') {
@@ -330,6 +348,9 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
       // returns true if it also needs a runtime counterpart.
       needRuntime = !!gen(el, dir, state.warn)
     }
+
+    // v-model 中只有 组件与默认model 不需要运行时
+    // 如果该指令需要在运行时运行，则生成code 返回
     if (needRuntime) {
       hasRuntime = true
       res += `{name:"${dir.name}",rawName:"${dir.rawName}"${
@@ -346,6 +367,9 @@ function genDirectives (el: ASTElement, state: CodegenState): string | void {
   }
 }
 
+// 内联模板只能有一个子节点
+// 将其唯一的子节点 作为根节点使用 generate 进行代码生成
+// inlineTemplate:{render, staticRenderFns}
 function genInlineTemplate (el: ASTElement, state: CodegenState): string | void {
   const ast = el.children[0]
   if (process.env.NODE_ENV !== 'production' && (
@@ -366,6 +390,7 @@ function genInlineTemplate (el: ASTElement, state: CodegenState): string | void 
   }
 }
 
+// 通过resolveScopedSlots 将生成的 [{key,fn}] 转换为 {key:fn}
 function genScopedSlots (
   slots: { [key: string]: ASTElement },
   state: CodegenState
@@ -377,6 +402,8 @@ function genScopedSlots (
   }])`
 }
 
+// 为带有 v-for || v-if 的 template slot-scope 进行 children 的 code 生成
+// 普通slot-scope 则作为普通元素生成
 function genScopedSlot (
   key: string,
   el: ASTElement,
@@ -395,6 +422,7 @@ function genScopedSlot (
   return `{key:${key},fn:${fn}}`
 }
 
+// 使用 renderList 遍历节点，再用 genScopedSlot 进行渲染
 function genForScopedSlot (
   key: string,
   el: any,
@@ -411,6 +439,9 @@ function genForScopedSlot (
     '})'
 }
 
+// 针对 v-for 进行子节点优化
+// 确认子节点标准化的级别
+// 生成子节点code 并带上优化级别 返回
 export function genChildren (
   el: ASTElement,
   state: CodegenState,
@@ -422,6 +453,8 @@ export function genChildren (
   if (children.length) {
     const el: any = children[0]
     // optimize single v-for
+    // 将只有一个v-for子节点的组件节点的nomalizeType 设为 1 (simple)
+    // 普通节点设为 0 (none)
     if (children.length === 1 &&
       el.for &&
       el.tag !== 'template' &&
@@ -446,6 +479,9 @@ export function genChildren (
 // 0: no normalization needed
 // 1: simple normalization needed (possible 1-level deep nested array)
 // 2: full normalization needed
+// 判断children 如果child 或 child.ifConditions 有需要标准化的节点则 被完全标准化
+// 如果children 的节点或 child.ifConditions 有组件则简单标准化
+// 如果所有 child.type !== 1 则不需要标准化
 function getNormalizationType (
   children: Array<ASTNode>,
   maybeComponent: (el: ASTElement) => boolean
@@ -469,10 +505,12 @@ function getNormalizationType (
   return res
 }
 
+// el v-for || template || slot 的节点需要被标准化
 function needsNormalization (el: ASTElement): boolean {
   return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
 
+// 生成各种虚拟节点 code
 function genNode (node: ASTNode, state: CodegenState): string {
   if (node.type === 1) {
     return genElement(node, state)
@@ -483,6 +521,7 @@ function genNode (node: ASTNode, state: CodegenState): string {
   }
 }
 
+// 创建exp || text 的code
 export function genText (text: ASTText | ASTExpression): string {
   return `_v(${text.type === 2
     ? text.expression // no need for () because already wrapped in _s()
@@ -490,14 +529,19 @@ export function genText (text: ASTText | ASTExpression): string {
   })`
 }
 
+// 空comment节点
 export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
+// 通过renderSlot ( attrs , attrsMap['v-bind'] , children) 
+// 获取 $scopedSlots[name] || $slots[name] || $createElement('template')
+// 返回的节点
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
+  // slot 上 attrs key 转为 camelize
   const attrs = el.attrs && `{${el.attrs.map(a => `${camelize(a.name)}:${a.value}`).join(',')}}`
   const bind = el.attrsMap['v-bind']
   if ((attrs || bind) && !children) {
@@ -524,6 +568,7 @@ function genComponent (
   })`
 }
 
+// 生成 attrs && props 对象 => key:val, code
 function genProps (props: Array<ASTAttr>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
@@ -548,6 +593,7 @@ function generateValue (value:any) {
 }
 
 // #3895, #4268
+// 转换特殊字符，防止解析json报错
 function transformSpecialNewlines (text: string): string {
   return text
     .replace(/\u2028/g, '\\u2028')

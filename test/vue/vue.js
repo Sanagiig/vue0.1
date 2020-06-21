@@ -10389,6 +10389,7 @@
     events,
     isNative
   ) {
+    console.log('events', events)
     var res = isNative ? 'nativeOn:{' : 'on:{';
     for (var name in events) {
       res += "\"" + name + "\":" + (genHandler(name, events[name])) + ",";
@@ -10417,6 +10418,7 @@
       if (isMethodPath || isFunctionExpression) {
         return handler.value
       }
+      console.log('no modifier', ("function($event){" + (handler.value) + "}"))
       return ("function($event){" + (handler.value) + "}") // inline statement
     } else {
       var code = '';
@@ -10457,6 +10459,8 @@
         isFunctionExpression ?
         ("return (" + (handler.value) + ")($event)") :
         handler.value;
+
+      console.log('modifier', "function($event){" + code + handlerCode + "}")
       return ("function($event){" + code + handlerCode + "}")
     }
   }
