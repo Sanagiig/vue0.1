@@ -4,12 +4,16 @@ import { normalizeChildren, simpleNormalizeChildren } from './normalize-children
 import config from '@config/index';
 import { createComponent } from './create-component';
 import { traverse } from '@core/observer/traverse';
+import { resolveAsset } from '../options';
 
 const SIMPLE_NORMALIZE = 1;
 const ALWAYS_NORMALIZE = 2;
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
+/**
+ * 创建 vnode 并会对子节点进行标准化
+ */
 export function createElement(
   context: Component,
   tag: any,
@@ -17,7 +21,7 @@ export function createElement(
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
-): VNodeInstance | Array<VNodeInstance> | VNode{
+): VNodeInstance | Array<VNodeInstance>{
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children;
     children = data;
@@ -30,6 +34,14 @@ export function createElement(
 }
 
 // 根据参数返回vnode 或 component
+/**
+ * data.__ob__  检验
+ * data.is => tag  ??
+ * 空 tag 检验
+ * 处理 单一children 且 child 是fn，作为具名插槽 
+ * 标准化 children
+ * tag is string && tag isReservedTag => 创建 Vnode
+ */
 export function _createElement(
   context: Component,
   tag?: string | ComponentCtor | Function | any,
@@ -47,6 +59,7 @@ export function _createElement(
     return createEmptyVNode();
   }
   // object syntax in v-bind
+  // 直接创建 ？？ mark
   if (isDef(data) && isDef(data.is)) {
     tag = data.is;
   }
@@ -67,6 +80,7 @@ export function _createElement(
     // }
   }
   // support single function children as default scoped slot
+  // 单子节点，且是fn，则作为默认具名插槽
   if (Array.isArray(children)
     && typeof children[0] === 'function') {
     data = data || {};
@@ -78,7 +92,9 @@ export function _createElement(
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children);
   }
+
   let vnode: any, ns;
+  // 
   if (typeof tag === 'string') {
     let Ctor;
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
@@ -88,6 +104,19 @@ export function _createElement(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       );
+
+      // 获取已注册的组件
+    } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // component
+      vnode = createComponent(Ctor, data, context, children, tag)
+    } else {
+      // unknown or unlisted namespaced elements
+      // check at runtime because it may get assigned a namespace when its
+      // parent normalizes children
+      vnode = new VNode(
+        tag, data, children,
+        undefined, undefined, context
+      )
     }
   }else {
     // direct component options / constructor
@@ -126,7 +155,7 @@ function applyNS (vnode:any, ns:any, force?:any) {
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-// 收集 :style :class 依赖
+//  :style :class 收集当前 watch 依赖
 function registerDeepBindings (data:any) {
   if (isObject(data.style)) {
     traverse(data.style)

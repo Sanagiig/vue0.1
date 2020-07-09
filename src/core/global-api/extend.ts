@@ -16,7 +16,18 @@ export function initExtend(Vue: GlobalAPI) {
   let cid = 1;
 
   /**
-   * Class inheritance
+   * 通过 extendOptions 继承 Vue , 返回一个 VueSup 构造函数, 
+   * 同时该构造函数会作为 Vue 的子组件记录至 Vue.components 中
+   * 如果 extendOptions._Ctor map 中存在 Super.cid 的对应,则直接返回
+   * 继承步骤:
+   * 1. 将 {...super.prototype} 作为 sub.prototype
+   * 2. 修改 sub.prototype.constructor , sub.cid = cid ++
+   * 3. 将 super.options && extendOptions 合并，作为 sub.options
+   * 4. sub.super = super
+   * 5. sub.options.props 的 keys 取出, sub.prototype[key] 映射至 sub.prototype._prop[key]
+   * 6. initProps initComputed 避免多次 defindProperty ?? mark
+   * 7. extend mixin use asserts 静态方法
+   * 8. superOptions extendOptions(当前extendOptions)  sealedOptions(sub.options)
    */
   Vue.extend = function (
     this: ComponentCtor,
@@ -38,6 +49,7 @@ export function initExtend(Vue: GlobalAPI) {
     const Sub:any = function VueComponent(this: Component, options: ComponentOptions) {
       this._init(options);
     }
+    // 继承 super.prototype ， cid++
     Sub.prototype = Object.create(Super.prototype);
     Sub.prototype.constructor = Sub;
     Sub.cid = cid++;
@@ -82,6 +94,7 @@ export function initExtend(Vue: GlobalAPI) {
   }
 }
 
+// _props 映射
 function initProps(Comp: Component) {
   const props = Comp.options.props;
   for (const key in props) {
@@ -89,6 +102,8 @@ function initProps(Comp: Component) {
   }
 }
 
+// options.computed keys => 都重新定义, 将其缓存取值都关联到 sub.prototype
+// 
 function initComputed(Comp: Component) {
   const computed = Comp.options.computed;
   for (const key in computed) {

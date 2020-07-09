@@ -27,7 +27,7 @@ declare type ComponentOptions = {
     // DOM
     el?: string | Element;
     template?: string;
-    render: (h: () => VNodeInstance) => VNodeInstance;
+    render: (h: () => VNodeInstance,c?:any) => VNodeInstance;
     renderError?: (h: () => VNodeInstance, err: Error) => VNodeInstance;
     staticRenderFns?: Array<() => VNodeInstance>;
   

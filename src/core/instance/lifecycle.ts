@@ -1,15 +1,19 @@
-import {
-  warn,
-  mark,
-  noop,
-  remove,
-  invokeWithErrorHandling
-} from '@utils/index';
+import { mark, measure } from '@utils/index';
 import { pushTarget, popTarget } from '@observer/dep';
 import { createEmptyVNode } from '@core/vdom/vnode';
 import config from '@config/index';
 import Watcher from '@observer/watcher';
-import { resolveConstructorOptions } from './init';
+import { toggleObserving } from '../observer/index';
+import { updateComponentListeners } from './events';
+import {
+  warn,
+  noop,
+  remove,
+  emptyObject,
+  validateProp,
+  invokeWithErrorHandling,
+  resolveSlots
+} from '@utils/index';
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false;
@@ -266,4 +270,98 @@ export function initLifecycle(vm: Component) {
   vm._isMounted = false;
   vm._isDestroyed = false;
   vm._isBeingDestroyed = false;
+}
+
+/**
+ * 更改 $options._parentVnode , $vnode, vm._vnode.parent 为 parentVnode
+ * $options._renderChildren = renderChildren
+ * 更改 $attrs $listeners 
+ * 更改 $slots , 使用 renderChildren && parent.context 获取新的被插槽分发的内容  
+ */
+export function updateChildComponent (
+  vm: Component | any,
+  propsData: any,
+  listeners: any,
+  parentVnode: MountedComponentVNode,
+  renderChildren: Array<VNodeInstance> | null
+) {
+  if (process.env.NODE_ENV !== 'production') {
+    isUpdatingChildComponent = true
+  }
+
+  // determine whether component has slot children
+  // we need to do this before overwriting $options._renderChildren
+  const hasChildren = !!(
+    renderChildren ||               // has new static slots
+    vm.$options._renderChildren ||  // has old static slots
+    parentVnode.data.scopedSlots || // has new scoped slots
+    vm.$scopedSlots !== emptyObject // has old scoped slots
+  )
+
+  vm.$options._parentVnode = parentVnode
+  vm.$vnode = parentVnode // update vm's placeholder node without re-render
+
+  if (vm._vnode) { // update child tree's parent
+    vm._vnode.parent = parentVnode
+  }
+  vm.$options._renderChildren = renderChildren
+
+  // update $attrs and $listeners hash
+  // these are also reactive so they may trigger child update if the child
+  // used them during render
+  vm.$attrs = parentVnode.data.attrs || emptyObject
+  vm.$listeners = listeners || emptyObject
+
+  // update props
+  // 根据 vm.$options._propKeys (默认初始化选项 props key) 与 propsData
+  // 对 vm._props[key] 进行修改 并做一些props 合法校验
+  // 修改 vm.$options.propsData
+  if (propsData && vm.$options.props) {
+    toggleObserving(false)
+    const props = vm._props
+    const propKeys = vm.$options._propKeys || []
+    for (let i = 0; i < propKeys.length; i++) {
+      const key = propKeys[i]
+      const propOptions: any = vm.$options.props // wtf flow?
+      props[key] = validateProp(key, propOptions, propsData, vm)
+    }
+    toggleObserving(true)
+    // keep a copy of raw propsData
+    vm.$options.propsData = propsData
+  }
+
+  // update listeners
+  // 根据传入的 listeners 对 原 vm.$options._parentListeners
+  // 进行更新 vm.on 更新
+  listeners = listeners || emptyObject
+  const oldListeners = vm.$options._parentListeners
+  vm.$options._parentListeners = listeners
+  updateComponentListeners(vm, listeners, oldListeners)
+
+  // resolve slots + force update if has children
+  // 更新 当前组件内部实现的插槽 <xx slot="name"></xx>
+  if (hasChildren) {
+    vm.$slots = resolveSlots(<VNodeInstance[]>renderChildren, parentVnode.context)
+    vm.$forceUpdate()
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    isUpdatingChildComponent = false
+  }
+}
+
+export function deactivateChildComponent (vm: Component, direct?: boolean) {
+  if (direct) {
+    vm._directInactive = true
+    if (isInInactiveTree(vm)) {
+      return
+    }
+  }
+  if (!vm._inactive) {
+    vm._inactive = true
+    for (let i = 0; i < vm.$children.length; i++) {
+      deactivateChildComponent(vm.$children[i])
+    }
+    callHook(vm, 'deactivated')
+  }
 }

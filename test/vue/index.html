@@ -8,23 +8,9 @@
 </head>
 
 <body>
-  <un-xx id="unxx"></un-xx>
-  <button id="btn">click</button>
-  <input id="input" type="text">
   <div id="app">
-    <slot slot="xx">
-      slot in slot
-    </slot>
-    {{sel}}
-    <button @click="x1+=1">click</button>
-    <button @click.self="click">click</button>
-    <button @click="click">click</button>
-    <!-- <button id="btn2">click2</button>
-    <select v-model="sel" name="xx" id="">
-      <option value="1">1111</option>
-      <option value="2">2222</option>
-      <option id="opt" :value="x1">3333</option>
-    </select> -->
+    <h1>{{x1}}</h1>
+    <comp></comp>
   </div>
   <script src="./vue.js"></script>
   <script>
@@ -33,6 +19,16 @@
       //   var val = document.getElementById('opt').val;
       //   console.log('val', val);
       // })
+      var component = Vue.component("comp", {
+        template: `
+        <div><h2>{{show}}</h2></div>
+        `,
+        data() {
+          return {
+            show: "hello"
+          }
+        }
+      })
       var vm = new Vue({
         el: '#app',
         data() {
@@ -49,11 +45,7 @@
           }
         },
       })
-      console.log('vm', vm)
-      console.log(document.getElementById('unxx').tagName)
-      document.getElementById('btn').addEventListener('click', function (e) {
-        console.log(e)
-      })
+      console.log('vm', vm, Vue.component)
     }
   </script>
 </body>

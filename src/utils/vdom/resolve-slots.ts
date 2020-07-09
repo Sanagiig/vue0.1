@@ -4,6 +4,10 @@
 
 //  删除 children.data.attrs.slot
 //  处理默认、具名插槽将插槽组成对象返回
+/**
+ * 将 attrs.slot 删除 , 如果 data.slot && context 与 child.context 相同(上下文一致)
+ * 则 将child 作为插槽加入至 slots 否则 child 作为默认插槽
+ */
 export function resolveSlots (
   children: VNodeInstance[],
   context: Component
@@ -21,9 +25,8 @@ export function resolveSlots (
     }
     // named slots should only be respected if the vnode was rendered in the
     // same context.
-    // 当前组件拥有具名插槽并且父组件也应用了该插槽
-    // 将该节点加入其 $slots[name]
-    // 默认插槽则加入slots.default
+    // 当子节点 与 context 相同(子节点上下文没改变) 将 child 加入至slots[data.slot]
+    // template tag 则将其 children 加入至 slots
     if ((child.context === context || child.fnContext === context) &&
       data && data.slot != null
     ) {
@@ -34,11 +37,15 @@ export function resolveSlots (
       } else {
         slot.push(child)
       }
+    
+    // \!data.slot || 上下文更改了，则将child 作为 default slot
     } else {
       (slots.default || (slots.default = [])).push(child)
     }
   }
+
   // ignore slots that contains only whitespace
+  // 删除空白 slot
   for (const name in slots) {
     if (slots[name].every(isWhitespace)) {
       delete slots[name]

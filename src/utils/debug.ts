@@ -13,6 +13,9 @@ if (process.env.NODE_ENV !== 'production') {
     .replace(classifyRE, c => c.toUpperCase())
     .replace(/[-_]/g, '')
 
+  /**
+   * 将 vm 的 trace(vm 向上的结构) 与 msg 一起打印出来
+   */
   warn = (msg, vm) => {
     const trace = vm ? generateComponentTrace(vm) : ''
 
@@ -31,10 +34,14 @@ if (process.env.NODE_ENV !== 'production') {
     }
   }
 
+  /**
+   * 返回经过整理的组件名称 <ComponentName>
+   */
   formatComponentName = (vm, includeFile) => {
     if (vm.$root === vm) {
       return '<Root>'
     }
+    // 取vm.options || Vue.options
     const options = typeof vm === 'function' && vm.cid != null
       ? vm.options
       : vm._isVue
@@ -63,6 +70,12 @@ if (process.env.NODE_ENV !== 'production') {
     return res
   }
 
+  /**
+   * 将 vm 自底向上检索, 所有的节点都存入 tree
+   * 当有递归引用 <x><x></x></x> 则会将其递归数记录下来，打印时进行优化
+   * 避免重复过多的 <tag>
+   * ---> repet(' ',5 + i * 2) <ComponentName>
+   */
   generateComponentTrace = vm => {
     if (vm._isVue && vm.$parent) {
       const tree:Object[] = []

@@ -17,6 +17,16 @@ import {
 	set,
 	del
 } from '@observer/index';
+
+/**
+ * 绑定 Vue 静态方法
+ * util = { warn, extend, mergeOptions, defineReactive }
+ * set , delete , nextTick, observable
+ * options = {} , options = {components, directives, filters}
+ * options._base = Vue
+ * extend(Vue.options.components, builtInComponents); 注册内建组件
+ * use, mixin, extend, component,filter, directive
+ */
 export function initGlobalAPI(Vue: GlobalAPI) {
 	// config
 	const configDef: any = {};
@@ -65,5 +75,6 @@ export function initGlobalAPI(Vue: GlobalAPI) {
 	initUse(Vue);
 	initMixin(Vue);
 	initExtend(Vue);
+	// component filter directive 方法的注册
 	initAssetRegisters(Vue);
 }

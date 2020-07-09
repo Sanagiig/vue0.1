@@ -121,3 +121,11 @@ declare type RenderFn = (
   keyOrIndex: string | number,
   index?: number
 ) => VNodeInstance
+
+declare type MountedComponentVNode = {
+  context: Component;
+  componentOptions: VNodeComponentOptions;
+  componentInstance: Component;
+  parent: VNodeInstance;
+  data: VNodeData;
+};

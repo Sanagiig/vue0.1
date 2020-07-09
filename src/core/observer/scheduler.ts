@@ -145,3 +145,14 @@ export function queueWatcher(watcher: WatcherInstance) {
         }
     }
 }
+
+/**
+ * Queue a kept-alive component that was activated during patch.
+ * The queue will be processed after the entire tree has been patched.
+ */
+export function queueActivatedComponent (vm: Component) {
+  // setting _inactive to false here so that a render function can
+  // rely on checking whether it's in an inactive tree (e.g. router-view)
+  vm._inactive = false
+  activatedChildren.push(vm)
+}

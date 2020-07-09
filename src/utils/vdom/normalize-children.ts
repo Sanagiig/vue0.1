@@ -11,7 +11,9 @@ function isTextNode (node:any): boolean {
 // normalization is needed - if any child is an Array, we flatten the whole
 // thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
 // because functional components already normalize their own children.
-// 如果有一个child是数组则将children与空数组相连 ?? mark
+/**
+ * 如果有一个child是数组则将children与空数组相连,避免 _isVList ?? mark
+ */
 export function simpleNormalizeChildren(children: any) {
   for(let i=0;i<children.length;i++){
     if(Array.isArray(children[i])){
@@ -25,6 +27,11 @@ export function simpleNormalizeChildren(children: any) {
 // e.g. <template>, <slot>, v-for, or when the children is provided by user
 // with hand-written render functions / JSX. In such cases a full normalization
 // is needed to cater to all possible types of children values.
+/**
+ * children 是原始对象则创建文本节点[children]
+ * 如果是数组则进行标准化
+ * 否则undefined
+ */
 export function normalizeChildren(children: any): Array<VNodeInstance> | void {
   return isPrimitive(children)
     ? [createTextVNode(children)]
@@ -33,9 +40,14 @@ export function normalizeChildren(children: any): Array<VNodeInstance> | void {
       : undefined;
 }
 
-// 合并children 之间相连的 primitive || text
-// 为 v-for child 生成 key
-// if c is arr 递归 
+/**
+ * 忽略undefined || boolean 子节点
+ * 递归数组child , 将其首个文本节点与 last 文本节点合并
+ * 如果 child is primitive && last 是文本节点则合并,否则child 被新建成文本节点
+ * 如果 child && last 都是文本节点则合并
+ * 如果 children 是通过 v-for 生成，且
+ * 子节点是数组(传入 nestedIndex ), 且没有key, 则 __vlist${nestedIndex}_${i}__
+ */
 function normalizeArrayChildren (children: any, nestedIndex?: string): Array<VNodeInstance> {
   const res:any[] = [];
   let i,c,lastIndex,last;

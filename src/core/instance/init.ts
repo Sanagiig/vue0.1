@@ -96,8 +96,12 @@ export function initInternalComponent(
   }
 }
 
-// 解析父Ctor.opt 如果opt对象被覆盖, 
-// 则更新当前 Ctor.options 并  mergeOptions(superOptions, Ctor.extendOptions);
+/**
+ * 递归对比 Ctor.superOptions && Ctor.super.options 直接覆盖
+ * Ctor.superOptions
+ * 对比 Ctor.option && Ctor.sealedOptions ,如果与密封的选项不同
+ * 则将其加入至 Ctor.extendOptions
+ */
 export function resolveConstructorOptions(
   Ctor: ComponentCtor): ComponentOptions {
   let options = Ctor.options;
