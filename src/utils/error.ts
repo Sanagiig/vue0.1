@@ -47,6 +47,9 @@ function logError (err:any, vm:Component | null, info:any) {
   }
 }
 
+/**
+ * 按上下文执行 handler 并处理其返回的 promise
+ */
 export function invokeWithErrorHandling (
   handler: Function,
   context: any,

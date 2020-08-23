@@ -17,7 +17,9 @@ function remove (event:any, fn:Function) {
   target.$off(event, fn);
 }
 
-// on off emit
+/**
+ * on off emit
+ */
 export function eventsMixin(Vue: ComponentCtor) {
   const hookRE = /^hook:/;
   Vue.prototype.$on = function (

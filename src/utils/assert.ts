@@ -174,7 +174,9 @@ export function getTagNamespace (tag: string): string | void {
 }
 
 const unknownElementCache = Object.create(null)
-// 判断是否属于未知标签
+/**
+ * 通过保留 tag 以及 该tagName 创建的element 判断是否未知 tag
+ */
 export function isUnknownElement (tag: string): boolean {
   /* istanbul ignore if */
   if (!inBrowser) {

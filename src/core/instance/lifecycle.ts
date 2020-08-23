@@ -61,9 +61,11 @@ export function callHook(vm: Component | any, hook: string) {
   popTarget();
 }
 
-// 判断render
-// beforeMount hook
-// vm._watcher 当状态发生改变时 vm._update(vm._render(), hydrating);
+/**
+ * 挂载，创建vm._watch 作为渲染函数监听
+ * 当有属性被修改时调用，并触发 beforeUpdate 狗子
+ * mounted 狗子
+ */
 export function mountComponent(
   vm: Component,
   el: Element | null,

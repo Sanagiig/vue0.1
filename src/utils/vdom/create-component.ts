@@ -170,7 +170,7 @@ export function createComponent (
   }
 
   // extract props
-  // 从 options.props keys 取出 data.props || data.attrs 
+  // 从 Ctor.options.props keys 取出 data.props || data.attrs 
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component

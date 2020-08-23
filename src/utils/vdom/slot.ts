@@ -1,5 +1,7 @@
-// 对比 slots 、 normalSlots 生成新 res ，
-// 如果 key in normalSlots && key not in slots ,则取 _ => normalSlots[key]
+/**
+ * 对比 slots 、 normalSlots 生成新 res ，
+ * 如果 key in normalSlots && key not in slots ,则取 _ => normalSlots[key]
+ */
 export function normalizeScopedSlots(
   slots: { [key: string]: Function } | void,
   normalSlots: { [key: string]: Array<VNodeInstance> }
@@ -29,7 +31,9 @@ export function normalizeScopedSlots(
   return res;
 }
 
-// 返回 func , func 将fn 的返回值进行处理 ， 返回合法的 [res] || res(null)
+/**
+ * 返回 func , func 将fn 的返回值进行处理 ， 返回合法的 [res] || res(null)
+ */
 function normalizeScopedSlot(fn: Function) {
   return (scope: any) => {
     const res = fn(scope);

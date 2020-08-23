@@ -13,6 +13,9 @@ import { handleError } from '../../utils/error';
 import VNode from '../vdom/vnode';
 import { createEmptyVNode } from '../vdom/vnode';
 
+/**
+ * $nextTick, _render
+ */
 export function renderMixin(Vue: ComponentCtor) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype);
@@ -89,6 +92,7 @@ export function initRender(vm: Component | any) {
   const options: ComponentOptions = vm.$options;
   const parentVnode = vm.$vnode = options._parentVnode;
   const renderContext = parentVnode && parentVnode.context;
+  // 父组件传入子组件的 children
   vm.$slots = resolveSlots(
     (<VNodeInstance[]>options._renderChildren),
     <Component>renderContext

@@ -10,7 +10,10 @@
 <body>
   <div id="app">
     <h1>{{x1}}</h1>
-    <comp></comp>
+    <comp>
+      <div>parent slot</div>
+      <!-- <div slot="scoped" slot-scope="show">parent scoped slot {{show}}</div> -->
+    </comp>
   </div>
   <script src="./vue.js"></script>
   <script>
@@ -21,12 +24,19 @@
       // })
       var component = Vue.component("comp", {
         template: `
-        <div><h2>{{show}}</h2></div>
+        <div>
+          <slot>def slot</slot>
+          <slot name="scoped" :show="show">scoped slot</slot>
+          <slot name="bottom">bottom</slot>
+        </div>
         `,
         data() {
           return {
             show: "hello"
           }
+        },
+        mounted() {
+          console.log('comp', this);
         }
       })
       var vm = new Vue({
@@ -44,8 +54,10 @@
             this.x1++;
           }
         },
+        mounted() {
+          console.log('vue', this);
+        }
       })
-      console.log('vm', vm, Vue.component)
     }
   </script>
 </body>
