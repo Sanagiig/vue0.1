@@ -15,6 +15,8 @@ const methodsToPatch:string[] = [
 
 /**
  * Intercept mutating methods and emit events
+ * 根据数组methods，对不同操作进行不同的ob触发，
+ * 如果有新增的值，则对 args:any[] 进行数组监听，然后再notify
  */
 methodsToPatch.forEach(function (method: string) {
     // cache original method
