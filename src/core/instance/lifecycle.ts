@@ -18,6 +18,9 @@ import {
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false;
 
+/**
+ *判断vm 节点往上，是否 _inactive
+ */
 function isInInactiveTree (vm:any) {
   while (vm && (vm = vm.$parent)) {
     if (vm._inactive) return true
@@ -25,6 +28,12 @@ function isInInactiveTree (vm:any) {
   return false
 }
 
+/**
+ * 根据参数修改 vm 及其 $children 的 direcctInactive 状态
+ * 或 inactive ( 如果无 direct 参数 但被置为 directInactive 状态
+ * 则忽略状态修改)
+ * 出发 vm activated 狗子
+ */
 export function activateChildComponent(vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = false

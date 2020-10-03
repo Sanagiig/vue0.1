@@ -57,10 +57,13 @@ declare interface Component {
     _isBeingDestroyed: boolean;
     // 如果有相应的hook则会$emit(xxhook)
     _hasHookEvent: boolean;
+    // 组件 inactive 状态
     _inactive: boolean | null;
+    // 组件指令 inactive 状态 ？？
     _directInactive: boolean;
     // vm
     _renderProxy: Component;
+    // vm 实例更新 watcher
     _watcher: WatcherInstance | null;
     _watchers: WatcherInstance[];
     // cb 有可能是带 fn 的对象

@@ -29,6 +29,10 @@ function resetSchedulerState () {
   waiting = flushing = false
 }
 
+/**
+ * 强制使用 direct 调用 activateChildComponent
+ * 并将 vm[i] inactive 状态 置为 true
+ */
 function callActivatedHooks (queue:Component[]) {
   for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
@@ -36,6 +40,9 @@ function callActivatedHooks (queue:Component[]) {
   }
 }
 
+/**
+ * 如果 watcher[i] 是 vm 的 watcher 则出发 updated狗子
+ */
 function callUpdatedHooks (queue:any[]) {
   let i = queue.length
   while (i--) {
